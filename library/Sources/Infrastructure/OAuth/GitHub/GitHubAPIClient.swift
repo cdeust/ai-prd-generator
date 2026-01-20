@@ -1,7 +1,8 @@
 import Foundation
+import Domain
 
 /// GitHub API client for fetching repository data
-public actor GitHubAPIClient {
+public actor GitHubAPIClient: GitHubAPIPort {
     private let token: GitHubToken
 
     public init(token: GitHubToken) {
@@ -93,52 +94,13 @@ public actor GitHubAPIClient {
 
 // MARK: - GitHub Data Models
 
-public struct GitHubRepository: Codable, Sendable {
-    public let id: Int
-    public let name: String
-    public let full_name: String
-    public let description: String?
-    public let `private`: Bool
-    public let default_branch: String
-    public let language: String?
+// GitHubRepository and GitHubFile moved to Domain layer
 
-    public init(id: Int, name: String, full_name: String, description: String?, `private`: Bool, default_branch: String, language: String?) {
-        self.id = id
-        self.name = name
-        self.full_name = full_name
-        self.description = description
-        self.`private` = `private`
-        self.default_branch = default_branch
-        self.language = language
-    }
-}
-
-public struct GitHubContent: Codable, Sendable {
-    public let name: String
-    public let path: String
-    public let type: String  // "file" or "dir"
-    public let size: Int
-    public let download_url: String?
-
-    public init(name: String, path: String, type: String, size: Int, download_url: String?) {
-        self.name = name
-        self.path = path
-        self.type = type
-        self.size = size
-        self.download_url = download_url
-    }
-}
-
-public struct GitHubFile: Sendable {
-    public let path: String
-    public let name: String
-    public let size: Int
-    public let downloadUrl: String?
-
-    public init(path: String, name: String, size: Int, downloadUrl: String?) {
-        self.path = path
-        self.name = name
-        self.size = size
-        self.downloadUrl = downloadUrl
-    }
+/// GitHub API response for directory contents (internal implementation detail)
+struct GitHubContent: Codable, Sendable {
+    let name: String
+    let path: String
+    let type: String  // "file" or "dir"
+    let size: Int
+    let download_url: String?
 }

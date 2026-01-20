@@ -1,8 +1,9 @@
 import Foundation
+import Domain
 
 /// GitHub Device Flow OAuth client for CLI authentication
 /// Uses GitHub's device flow (like GitHub CLI) - no client_secret needed
-public actor GitHubDeviceFlowClient {
+public actor GitHubDeviceFlowClient: GitHubDeviceFlowPort {
     private let clientId: String
     private let keychainStorage: KeychainStorage
 

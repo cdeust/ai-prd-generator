@@ -123,30 +123,43 @@ Use RAG to understand:
 - Indexing the codebase (if provided)
 
 
-### Step 1: Initial Analysis
-I analyze your input using the library's analysis pipeline:
-```python
-# The skill executes this via the library
-analysis = await prd_library.analyze_requirements(
-    title=title,
-    description=description,
-    mockup_files=mockup_paths,
-    codebase_path=codebase_path
+### Step 1: Initial Analysis & Setup
+I execute actual Swift code to initialize the library and analyze requirements:
+```swift
+import Foundation
+import Composition
+
+// Initialize the library with configuration
+let config = try Configuration.fromEnvironment()
+let composition = try await LibraryComposition.create(configuration: config)
+
+// Create PRD request from user input
+let request = PRDRequest(
+    title: userTitle,
+    description: userDescription,
+    requirements: userRequirements,
+    mockupFiles: mockupPaths,  // Optional: paths to mockup images
+    codebasePath: codebasePath,  // Optional: path to codebase for RAG
+    confidenceThreshold: 0.90
 )
 ```
 
 ### Step 2: Mockup Vision Analysis (if provided)
-```python
-# Multi-provider vision analysis
-mockup_analysis = await prd_library.analyze_mockup(
-    image_path=mockup_path,
-    provider="anthropic"  # or openai, gemini, apple
-)
+If you attach mockup images, I analyze them with multi-provider vision:
+```swift
+// Vision analysis (automatic if mockup files provided)
+if let mockupPath = request.mockupFiles?.first {
+    let visionAnalyzer = composition.services.factory?.createVisionAnalyzer()
+    let mockupAnalysis = try await visionAnalyzer?.analyze(
+        imagePath: mockupPath,
+        prompt: "Extract UI components, interactions, and data requirements"
+    )
 
-# Extracts:
-# - UI components and interactions
-# - Data requirements
-# - Technical implications
+    // Extracts:
+    // - UI components (buttons, forms, tables)
+    // - User interactions and flows
+    // - Data requirements and API needs
+}
 ```
 
 ### Step 3: Codebase RAG (if provided)
@@ -204,22 +217,34 @@ Top Code Context:
 - To restart: `docker start ai-prd-rag-db`
 - To remove: `docker rm -f ai-prd-rag-db` (deletes all embeddings)
 
-**Technical Implementation:**
-```python
-# This is what I execute behind the scenes
-if not os.getenv("DATABASE_URL"):
-    # Auto-start PostgreSQL container
-    await setup_rag_database()
-    
-await prd_library.index_codebase(
-    path=codebase_path,
-    project_name="my-app"
-)
-context = await prd_library.search_codebase(
-    query="authentication patterns",
-    project_name="my-app",
-    limit=10
-)
+**Technical Implementation (Actual Swift Code):**
+```swift
+// Check if DATABASE_URL is set, otherwise setup Docker container
+if ProcessInfo.processInfo.environment["DATABASE_URL"] == nil {
+    // Auto-start PostgreSQL with pgvector
+    try await Bash.execute("docker run -d --name ai-prd-rag-db -p 5433:5432 -e POSTGRES_PASSWORD=ai_prd_pass ankane/pgvector:latest")
+    ProcessInfo.processInfo.environment["DATABASE_URL"] = "postgresql://postgres:ai_prd_pass@localhost:5433/ai_prd_rag"
+}
+
+// Index codebase (if provided)
+if let codebasePath = request.codebasePath {
+    let createCodebase = composition.useCases.createCodebase
+    let indexCodebase = composition.useCases.indexCodebase
+
+    let codebase = try await createCodebase.execute(name: "user-project", path: codebasePath)
+    try await indexCodebase.execute(codebaseId: codebase.id)
+}
+
+// Search codebase for relevant context
+if let hybridSearch = composition.services.hybridSearch {
+    let results = try await hybridSearch.search(
+        query: "authentication patterns",
+        projectId: codebase.id,
+        limit: 10,
+        similarityThreshold: 0.7
+    )
+    // Results contain ranked code chunks with file paths and line numbers
+}
 ```
 
 
@@ -291,38 +316,55 @@ context = await prd_library.search_codebase(
 
 **I present 1-4 questions at a time using AskUserQuestion tool, then refine based on selected answers.**
 
-### Step 5: Chain of Verification (Quality Assurance)
-```python
-# Multi-LLM consensus - The most reliable quality mechanism
-verification = await prd_library.verify_prd(
-    prd=prd,
-    judges=["claude-opus", "gpt-4", "gemini-pro"]  # 3+ independent judges
-)
+### Step 5: Generate PRD Document
+Once confidence >= 90%, I generate the complete PRD:
+```swift
+// Execute PRD generation with all context
+let generatePRD = composition.useCases.generatePRD
+let prdDocument = try await generatePRD.execute(request: request)
 
-# Each judge reviews independently:
-# - Completeness: Are all requirements captured?
-# - Consistency: Do sections align with each other?
-# - Clarity: Are requirements unambiguous?
-# - Testability: Can requirements be validated?
-
-# Consensus resolution identifies:
-# - Gaps (missing requirements all judges notice)
-# - Conflicts (contradictions between sections)
-# - Ambiguities (unclear language flagged by multiple judges)
-
-final_prd = await prd_library.resolve_disagreements(verification)
-
-# Result: High-quality PRD validated by multiple AI models
+// Generated PRD includes:
+// - Executive Summary
+// - Requirements (functional & non-functional)
+// - User Stories
+// - Technical Specifications
+// - Test Cases
+// - Acceptance Criteria
+// - JIRA Tickets (epics, stories, tasks)
 ```
 
-### Step 6: Generate PRD Document
-```python
-# Generate final PRD with all sections
-prd_document = await prd_library.generate_prd(
-    requirements=refined_requirements,
-    context=enriched_context,
-    confidence_score=confidence
+### Step 6: Chain of Verification (Quality Assurance)
+After generating the PRD, I verify it with multi-LLM consensus:
+```swift
+// Multi-judge verification for quality assurance
+let verifyPRD = composition.useCases.verifyPRD
+let verification = try await verifyPRD.execute(
+    prdId: prdDocument.id,
+    judgeCount: 3,  // Default: 3 independent AI judges
+    consensusThreshold: 0.66  // Require 66% agreement
 )
+
+// Each judge reviews independently:
+// - Completeness: Are all requirements captured?
+// - Consistency: Do sections align with each other?
+// - Clarity: Are requirements unambiguous?
+// - Testability: Can requirements be validated?
+
+// Consensus resolution identifies:
+// - Gaps (missing requirements flagged by multiple judges)
+// - Conflicts (contradictions between sections)
+// - Ambiguities (unclear language requiring clarification)
+
+// I automatically refine PRD if consensus < threshold
+if verification.consensusScore < 0.66 {
+    // Refine and regenerate based on judge feedback
+    let refinedPRD = try await generatePRD.execute(
+        request: request,
+        verificationFeedback: verification.feedback
+    )
+}
+
+// Result: High-quality PRD validated by multiple AI models
 ```
 
 ## Output Structure

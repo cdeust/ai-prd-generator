@@ -187,6 +187,17 @@ public final class ApplicationFactory: @unchecked Sendable {
         }
     }
 
+    /// Get GitHub integration service for repository access
+    func getGitHubIntegration() -> GitHubIntegrationService {
+        let deviceFlowClient = GitHubDeviceFlowClient()
+        return GitHubIntegrationService(
+            deviceFlowClient: deviceFlowClient,
+            apiClientFactory: { token in
+                GitHubAPIClient(token: token)
+            }
+        )
+    }
+
     /// Get verification service for Chain of Verification
     private func getVerificationService(
         aiProvider: AIProviderPort,

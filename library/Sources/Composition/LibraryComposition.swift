@@ -30,15 +30,18 @@ public struct LibraryComposition: Sendable {
         public let hybridSearch: HybridSearchService?
         public let factory: UseCaseFactory?
         public let intelligenceTracker: IntelligenceTrackerService?
+        public let githubIntegration: GitHubIntegrationService?
 
         public init(
             hybridSearch: HybridSearchService?,
             factory: UseCaseFactory? = nil,
-            intelligenceTracker: IntelligenceTrackerService? = nil
+            intelligenceTracker: IntelligenceTrackerService? = nil,
+            githubIntegration: GitHubIntegrationService? = nil
         ) {
             self.hybridSearch = hybridSearch
             self.factory = factory
             self.intelligenceTracker = intelligenceTracker
+            self.githubIntegration = githubIntegration
         }
     }
 
@@ -105,10 +108,12 @@ public struct LibraryComposition: Sendable {
         // Shared services with factory for custom use cases
         let useCaseFactory = UseCaseFactory(applicationFactory: factory)
         let intelligenceTracker = factory.getIntelligenceTracker()
+        let githubIntegration = factory.getGitHubIntegration()
         let services = SharedServices(
             hybridSearch: nil,
             factory: useCaseFactory,
-            intelligenceTracker: intelligenceTracker
+            intelligenceTracker: intelligenceTracker,
+            githubIntegration: githubIntegration
         )
 
         // Repositories
