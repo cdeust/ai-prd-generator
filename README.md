@@ -64,6 +64,13 @@ Generate professional Product Requirements Documents using state-of-the-art AI t
    - **Why needed**: Automatic PostgreSQL + pgvector setup for RAG
    - **Note**: pgvector is included in Docker image (no manual install)
 
+5. **GitHub CLI** (for GitHub repository analysis)
+   - Install: `brew install gh`
+   - Authenticate: `gh auth login`
+   - Verify: `gh auth status`
+   - **Why needed**: Access private GitHub repositories for codebase analysis
+   - **Note**: Uses official GitHub CLI for secure token management
+
 **RAG = Retrieval Augmented Generation** - Analyzes your codebase to make PRDs context-aware of existing code patterns.
 
 ---
@@ -167,7 +174,7 @@ Analyze:
 **Uses**: RAG with PostgreSQL (Docker auto-starts on first use)
 **Requires**: Docker installed (see Optional Prerequisites)
 
-### GitHub Repository Analysis (RAG + Device Flow)
+### GitHub Repository Analysis (RAG + GitHub CLI)
 
 ```
 Generate a PRD for adding real-time notifications.
@@ -180,9 +187,9 @@ Analyze:
 - API endpoints
 ```
 
-**First time**: You'll enter a code at github.com/login/device to authorize
-**Subsequent uses**: Token reused from macOS Keychain
-**Requires**: Docker for RAG indexing
+**First time**: Run `gh auth login` to authenticate with GitHub CLI
+**Subsequent uses**: Token automatically reused
+**Requires**: GitHub CLI (`brew install gh`) + Docker for RAG indexing
 
 ---
 
@@ -263,10 +270,10 @@ Context-Aware PRD Generated
 
 ### 5. GitHub Integration (Optional)
 
-- **Device Flow OAuth** - No OAuth app creation needed (like GitHub CLI)
-- **Private repositories** - Full access with your authorization
-- **Token storage** - Secure macOS Keychain
-- **One-time auth** - Enter code once, reused forever
+- **GitHub CLI Authentication** - Uses official `gh` CLI tool
+- **Private repositories** - Full access with your GitHub account
+- **Token storage** - Managed securely by GitHub CLI
+- **One-time auth** - Run `gh auth login` once, token reused
 - **Automatic RAG** - Indexes GitHub repos same as local code
 
 ---
@@ -455,7 +462,7 @@ ai-prd-generator/
 │   ├── with-mockup.md         # Vision AI example
 │   ├── with-codebase.md       # RAG example
 │   └── with-github-repo.md    # GitHub integration example
-└── GITHUB_INTEGRATION.md      # GitHub Device Flow guide
+└── GITHUB_INTEGRATION.md      # GitHub CLI integration guide
 ```
 
 **Total size**: ~50MB (library + dependencies)
@@ -502,7 +509,7 @@ ai-prd-generator/
 │   • AI Providers (Anthropic, OpenAI)    │
 │   • Vision Analyzers (multi-provider)   │
 │   • RAG System (optional PostgreSQL)    │
-│   • GitHub OAuth (Device Flow)          │
+│   • GitHub CLI Integration              │
 └─────────────────────────────────────────┘
 ```
 

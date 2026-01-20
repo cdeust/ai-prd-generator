@@ -40,7 +40,7 @@
   "integrations": {
     "github": {
       "enabled": true,
-      "auth_method": "device_flow",
+      "auth_method": "gh_cli",
       "scopes": ["repo", "read:org"]
     },
     "jira": {
