@@ -227,34 +227,69 @@ context = await prd_library.search_codebase(
 
 **I MUST ask clarification questions before generating the PRD.**
 
+**CRITICAL: I MUST use the `AskUserQuestion` tool to present interactive multi-choice questions.**
+- DO NOT output questions as text - always use the tool
+- Each question must have 2-4 options with clear descriptions
+- Questions should have short headers (max 12 chars) for display
+- Use multiSelect: false for single-choice, true for multiple selections
+
 **Process:**
 1. I analyze the requirements and identify ambiguities
 2. I generate 2-5 targeted clarification questions
-3. I present the questions to you with current confidence score
-4. I wait for your answers (DO NOT proceed without answers)
-5. I refine my understanding based on your responses
+3. I use `AskUserQuestion` tool to present interactive options (NOT text output)
+4. I wait for user to select their answers
+5. I refine my understanding based on selected responses
 6. I re-calculate confidence score
-7. If confidence < 90%, I repeat with more questions
+7. If confidence < 90%, I repeat with more questions using AskUserQuestion
 8. Once confidence >= 90%, I proceed to PRD generation
 
-**Example Questions I Might Ask:**
-- "Should users be able to link multiple OAuth providers to one account?"
-- "What should happen if OAuth provider is down? Fallback to email/password?"
-- "Should session timeout be configurable per user, or system-wide?"
-- "Do you need MFA (multi-factor authentication) support?"
+**Example - How I Use AskUserQuestion Tool:**
+```json
+{
+  "questions": [
+    {
+      "question": "Should users be able to link multiple OAuth providers to one account?",
+      "header": "Multi-OAuth",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "Single provider only",
+          "description": "Each account uses one OAuth provider (Google OR GitHub, not both)"
+        },
+        {
+          "label": "Multiple providers",
+          "description": "Users can link both Google and GitHub to same account"
+        },
+        {
+          "label": "Primary + backups",
+          "description": "One primary OAuth, others as fallback options"
+        }
+      ]
+    },
+    {
+      "question": "What should happen if OAuth provider is unavailable?",
+      "header": "Fallback",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "Email/password fallback",
+          "description": "Allow traditional login if OAuth fails"
+        },
+        {
+          "label": "Error message only",
+          "description": "Show error, user must wait for OAuth to recover"
+        },
+        {
+          "label": "Cached credentials",
+          "description": "Use last successful OAuth token temporarily"
+        }
+      ]
+    }
+  ]
+}
+```
 
-```python
-# Library implementation (for reference)
-while confidence < 0.90:
-    questions = await prd_library.generate_clarification_questions(
-        current_prd=prd,
-        confidence_score=confidence
-    )
-    answers = await prompt_user(questions)
-    prd = await prd_library.refine_prd(prd, answers)
-    confidence = await prd_library.score_confidence(prd)
-```
-```
+**I present 1-4 questions at a time using AskUserQuestion tool, then refine based on selected answers.**
 
 ### Step 5: Chain of Verification (Quality Assurance)
 ```python

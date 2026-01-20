@@ -36,5 +36,19 @@
     "include_metadata": true,
     "include_confidence_scores": true,
     "include_verification_results": true
+  },
+  "integrations": {
+    "github": {
+      "enabled": true,
+      "auth_method": "device_flow",
+      "scopes": ["repo", "read:org"]
+    },
+    "jira": {
+      "enabled": false,
+      "url": "",
+      "client_id": "",
+      "client_secret": "",
+      "project_key": ""
+    }
   }
 }
