@@ -4,36 +4,36 @@ import Domain
 /// Service for GitHub repository integration
 /// Handles authentication and repository access
 public actor GitHubIntegrationService: Sendable {
-    private let deviceFlowClient: GitHubDeviceFlowPort
+    private let authClient: GitHubAuthenticationPort
     private let apiClientFactory: (GitHubToken) -> GitHubAPIPort
 
     public init(
-        deviceFlowClient: GitHubDeviceFlowPort,
+        authClient: GitHubAuthenticationPort,
         apiClientFactory: @escaping (GitHubToken) -> GitHubAPIPort
     ) {
-        self.deviceFlowClient = deviceFlowClient
+        self.authClient = authClient
         self.apiClientFactory = apiClientFactory
     }
 
-    /// Authenticate with GitHub using Device Flow
-    /// Displays code for user to enter at github.com/login/device
+    /// Authenticate with GitHub using GitHub CLI
+    /// Runs `gh auth login` interactively
     public func authenticate() async throws -> GitHubToken {
-        return try await deviceFlowClient.authenticate()
+        return try await authClient.authenticate()
     }
 
     /// Check if already authenticated
-    public func isAuthenticated() throws -> Bool {
-        return try deviceFlowClient.getStoredToken() != nil
+    public func isAuthenticated() async throws -> Bool {
+        return try await authClient.getStoredToken() != nil
     }
 
     /// Get stored authentication token
-    public func getStoredToken() throws -> GitHubToken? {
-        return try deviceFlowClient.getStoredToken()
+    public func getStoredToken() async throws -> GitHubToken? {
+        return try await authClient.getStoredToken()
     }
 
     /// Revoke authentication
-    public func revokeAuthentication() throws {
-        try deviceFlowClient.deleteToken()
+    public func revokeAuthentication() async throws {
+        try await authClient.deleteToken()
     }
 
     /// Fetch repository information

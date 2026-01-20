@@ -189,9 +189,9 @@ public final class ApplicationFactory: @unchecked Sendable {
 
     /// Get GitHub integration service for repository access
     func getGitHubIntegration() -> GitHubIntegrationService {
-        let deviceFlowClient = GitHubDeviceFlowClient()
+        let authClient = GitHubCLIAuthenticator()
         return GitHubIntegrationService(
-            deviceFlowClient: deviceFlowClient,
+            authClient: authClient,
             apiClientFactory: { token in
                 GitHubAPIClient(token: token)
             }
