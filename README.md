@@ -62,7 +62,7 @@ This isn't just instructions - it's the complete AI PRD generation system runnin
    - **Anthropic Claude** (Recommended): https://console.anthropic.com/
    - **OpenAI GPT-4**: https://platform.openai.com/api-keys
    - **Google Gemini**: https://ai.google.dev/
-   - **Apple Intelligence**: No API key needed (macOS 13+, built-in)
+   - **Apple Intelligence**: No API key needed (requires macOS 26.0 Tahoe or later, built-in)
 
 ### Optional (Advanced Features)
 

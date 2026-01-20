@@ -197,8 +197,8 @@ python3 --version
 #### Option D: Apple Intelligence (No API Key)
 
 **Requires:**
-- macOS 13+ (Ventura or later)
-- Apple Silicon (M1/M2/M3)
+- macOS 26.0 Tahoe or later
+- Apple Silicon (M1/M2/M3 or newer)
 - No API key or internet connection needed
 
 **Setup:**
@@ -399,7 +399,8 @@ source ~/.zshrc
 | Platform | Supported | Notes |
 |----------|-----------|-------|
 | macOS 13+ (Intel) | ✅ | Fully supported |
-| macOS 13+ (Apple Silicon) | ✅ | Fully supported + Apple Intelligence |
+| macOS 13-25 (Apple Silicon) | ✅ | Fully supported |
+| macOS 26.0+ Tahoe (Apple Silicon) | ✅ | Fully supported + Apple Intelligence |
 | macOS 12 or older | ❌ | Swift 5.9 not available |
 | Ubuntu 20.04+ | ✅ | Fully supported |
 | Debian 11+ | ✅ | Fully supported |

@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **OpenAPI Specification Generation** - Automatic API endpoint documentation
 - **Automatic Database Setup** - PostgreSQL + pgvector via Docker/Colima (zero manual configuration)
 - **100% Local Execution** - Privacy-first, code never leaves your machine
-- **Multi-Provider AI Support** - Anthropic Claude, OpenAI GPT-4, Google Gemini, Apple Intelligence
+- **Multi-Provider AI Support** - Anthropic Claude, OpenAI GPT-4, Google Gemini, Apple Intelligence (requires macOS 26.0 Tahoe)
 - **Complete Swift Library** - 880 source files with clean architecture
 - **Comprehensive Documentation** - README, PREREQUISITES, installation guide, usage examples
 

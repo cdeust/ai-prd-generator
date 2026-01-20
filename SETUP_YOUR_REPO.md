@@ -149,7 +149,7 @@ Professional Product Requirements Document generator for Claude Code with produc
 - Swift 5.9+ (Xcode OR Swift toolchain)
 - Docker OR Colima (for automatic RAG database)
 - Python 3.8+
-- AI Provider API key (Anthropic/OpenAI/Gemini) OR Apple Intelligence
+- AI Provider API key (Anthropic/OpenAI/Gemini) OR Apple Intelligence (macOS 26.0 Tahoe+)
 - macOS 13+ or Linux (Ubuntu 20.04+)
 
 ### Installation
