@@ -1,0 +1,40 @@
+{
+  "version": "1.0.0",
+  "clarification": {
+    "max_rounds": 5,
+    "confidence_threshold": 0.90,
+    "min_questions_per_round": 2,
+    "max_questions_per_round": 5
+  },
+  "rag": {
+    "enabled": true,
+    "chunk_size": 1000,
+    "chunk_overlap": 200,
+    "max_results": 10,
+    "similarity_threshold": 0.7
+  },
+  "vision": {
+    "provider": "anthropic",
+    "fallback_providers": ["openai", "gemini", "apple"],
+    "max_retries": 3
+  },
+  "verification": {
+    "enabled": true,
+    "num_judges": 3,
+    "consensus_threshold": 0.66
+  },
+  "thinking": {
+    "default_strategy": "chain-of-thought",
+    "available_strategies": [
+      "chain-of-thought",
+      "tree-of-thought",
+      "react"
+    ]
+  },
+  "output": {
+    "format": "markdown",
+    "include_metadata": true,
+    "include_confidence_scores": true,
+    "include_verification_results": true
+  }
+}

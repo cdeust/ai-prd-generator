@@ -1,0 +1,44 @@
+# Build artifacts
+.build/
+*.xcodeproj
+*.xcworkspace
+.swiftpm/
+DerivedData/
+
+# macOS
+.DS_Store
+._*
+
+# IDE
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.log
+*.swp
+*.swo
+*~
+
+# Database
+postgres-data/
+*.db
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Distribution (keep ZIP out of repo)
+*.zip
+
+# Testing
+.build-test/
+test-output/
+
+# Documentation build artifacts
+.doctrees/
+_build/

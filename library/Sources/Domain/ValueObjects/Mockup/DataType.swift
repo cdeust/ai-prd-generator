@@ -1,0 +1,31 @@
+import Foundation
+
+/// Data type for inferred form fields
+public enum DataType: String, Sendable, Codable {
+    case text = "Text"
+    case email = "Email"
+    case phone = "Phone"
+    case url = "URL"
+    case password = "Password"
+    case number = "Number"
+    case integer = "Integer"
+    case decimal = "Decimal"
+    case currency = "Currency"
+    case date = "Date"
+    case time = "Time"
+    case datetime = "Date Time"
+    case boolean = "Boolean"
+    case json = "JSON"
+    case array = "Array"
+    case file = "File"
+    case image = "Image"
+    case video = "Video"
+    case audio = "Audio"
+    case location = "Location"
+    case address = "Address"
+    case zipCode = "Zip Code"
+    case country = "Country"
+    case state = "State"
+    case city = "City"
+    case custom = "Custom"
+}
