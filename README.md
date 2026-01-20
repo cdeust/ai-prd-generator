@@ -30,7 +30,7 @@ This isn't just instructions - it's the complete AI PRD generation system runnin
 ### Required (All Users)
 
 1. **macOS 13+** or **Linux**
-   - macOS: Ventura (13.0) or later
+   - macOS: Tahoe (26.0) or later
    - Linux: Ubuntu 20.04+, Debian 11+, or equivalent
 
 2. **Swift 5.9+**
@@ -117,7 +117,7 @@ cd ai-prd-generator
 export ANTHROPIC_API_KEY="sk-ant-..."
 # OR
 export OPENAI_API_KEY="sk-..."
-# OR use Apple Intelligence (no key needed, macOS 13+)
+# OR use Apple Intelligence (no key needed, macOS 26.0+)
 
 # 4. Enable in Claude Code
 claude-code skill add ai-prd-generator
@@ -234,7 +234,7 @@ Edit `skill-config.json` to customize:
 export ANTHROPIC_API_KEY="sk-ant-..."
 export OPENAI_API_KEY="sk-..."
 export GEMINI_API_KEY="..."
-# Or use Apple Intelligence (macOS 13+ only)
+# Or use Apple Intelligence (macOS 26.0+ only)
 
 # Optional: PostgreSQL for persistent RAG
 export DATABASE_URL="postgresql://localhost/ai_prd"
