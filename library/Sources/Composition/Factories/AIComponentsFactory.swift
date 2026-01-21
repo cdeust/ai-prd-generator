@@ -26,9 +26,6 @@ struct AIComponentsFactory {
         case .bedrock:
             // Bedrock uses Claude tokenizer for Anthropic models
             return ClaudeTokenizer()
-        case .mock:
-            // Mock provider uses simple tokenizer
-            return OpenAITokenizer()
         }
     }
 
@@ -63,9 +60,6 @@ struct AIComponentsFactory {
             // Would use AWS Bedrock Converse API with vision-enabled models
             // Different from Anthropic direct API (uses IAM auth, different payload)
             // For now, vision not available with Bedrock provider
-            return nil
-        case .mock:
-            // Mock provider doesn't support vision analysis
             return nil
         }
     }

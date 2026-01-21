@@ -74,7 +74,7 @@ public actor MockPRDEmbeddingGenerator: EmbeddingGeneratorPort {
 
         return CodeEmbedding(
             chunkId: chunk.id,
-            codebaseId: chunk.fileId,
+            projectId: chunk.fileId,
             embedding: embedding,
             model: modelName,
             embeddingVersion: embeddingVersion,

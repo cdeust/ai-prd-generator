@@ -24,11 +24,24 @@
     "consensus_threshold": 0.66
   },
   "thinking": {
-    "default_strategy": "chain-of-thought",
+    "default_strategy": "verified_reasoning",
+    "extended_thinking_enabled": true,
     "available_strategies": [
-      "chain-of-thought",
-      "tree-of-thought",
-      "react"
+      "chain_of_thought",
+      "tree_of_thoughts",
+      "graph_of_thoughts",
+      "react",
+      "reflexion",
+      "plan_and_solve",
+      "verified_reasoning",
+      "recursive_refinement",
+      "zero_shot",
+      "few_shot",
+      "self_consistency",
+      "generate_knowledge",
+      "prompt_chaining",
+      "multimodal_cot",
+      "meta_prompting"
     ]
   },
   "output": {

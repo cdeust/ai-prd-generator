@@ -7,4 +7,5 @@ import Domain
 public enum VerifiedClarificationResult {
     case complete(PRDDocument, verificationResult: CoVVerificationResult?)
     case continueWithQuestions(ClarificationSession<String, Int, String>)
+    case readyToComplete(ClarificationSession<String, Int, String>, currentCompleteness: Double)
 }

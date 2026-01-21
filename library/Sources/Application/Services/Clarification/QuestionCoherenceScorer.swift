@@ -11,17 +11,20 @@ public struct QuestionCoherenceScorer: Sendable {
     private let effectivenessThreshold: Double
     private let promptBuilder: CoherenceScoringPromptBuilder
     private let scoreParser: CoherenceScoreParser
+    private let verifier: LLMResponseVerifier?
 
     public init(
         aiProvider: AIProviderPort,
         coherenceThreshold: Double = VerificationThresholds.preFilterCoherence,
-        effectivenessThreshold: Double = VerificationThresholds.preFilterEffectiveness
+        effectivenessThreshold: Double = VerificationThresholds.preFilterEffectiveness,
+        verifier: LLMResponseVerifier? = nil
     ) {
         self.aiProvider = aiProvider
         self.coherenceThreshold = coherenceThreshold
         self.effectivenessThreshold = effectivenessThreshold
         self.promptBuilder = CoherenceScoringPromptBuilder()
         self.scoreParser = CoherenceScoreParser()
+        self.verifier = verifier
     }
 
     /// Score ALL questions and return them with their coherence scores (no filtering)
@@ -49,6 +52,22 @@ public struct QuestionCoherenceScorer: Sendable {
 
             do {
                 let response = try await aiProvider.generateText(prompt: prompt, temperature: 0.1)
+
+                // Apply Chain of Verification to coherence scoring
+                if let verifier = verifier {
+                    let context = "Coherence scoring for clarification question: \(question.question)"
+                    let verificationResult = try await verifier.verifyResponse(
+                        prompt: prompt,
+                        response: response,
+                        context: context,
+                        verificationType: .questionRelevance
+                    )
+
+                    if !verificationResult.verified {
+                        print("⚠️ [QuestionCoherenceScorer] Scoring verification failed - using response with caution")
+                    }
+                }
+
                 let scores = scoreParser.parseScores(from: response, questionCount: 1)
                 let score = scores.first ?? QuestionScore(
                     coherence: 0.5,

@@ -9,7 +9,8 @@ import AWSClientRuntime
 /// Following naming convention: {Technology}Provider
 ///
 /// AWS Bedrock provides access to multiple foundation models
-/// - Anthropic Claude: anthropic.claude-sonnet-4-5-20250929
+/// - Anthropic Claude: anthropic.claude-sonnet-4-5-20250929 (with extended thinking)
+/// - Amazon Nova: amazon.nova-2-pro (with reasoning config)
 /// - Amazon Titan: amazon.titan-text-express-v1
 /// - Meta Llama: meta.llama2-13b-chat-v1
 @available(iOS 15.0, macOS 12.0, *)
@@ -53,14 +54,16 @@ public final class BedrockProvider: AIProviderPort, Sendable {
 
     public func generateText(
         prompt: String,
-        temperature: Double
+        temperature: Double,
+        extendedThinking: Bool? = true
     ) async throws -> String {
         // Build request payload based on model
         let requestBody = try await payloadBuilder.buildPayload(
             for: modelId,
             prompt: prompt,
             temperature: temperature,
-            stream: false
+            stream: false,
+            extendedThinking: extendedThinking ?? true
         )
 
         let input = InvokeModelInput(
@@ -82,13 +85,15 @@ public final class BedrockProvider: AIProviderPort, Sendable {
 
     public func streamText(
         prompt: String,
-        temperature: Double
+        temperature: Double,
+        extendedThinking: Bool? = true
     ) async throws -> AsyncStream<String> {
         let requestBody = try await payloadBuilder.buildPayload(
             for: modelId,
             prompt: prompt,
             temperature: temperature,
-            stream: true
+            stream: true,
+            extendedThinking: extendedThinking ?? true
         )
 
         let input = InvokeModelWithResponseStreamInput(

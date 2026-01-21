@@ -34,7 +34,8 @@ final class GeneratePRDUseCaseSpec: XCTestCase {
         let useCase = GeneratePRDUseCase(
             aiProvider: mockAI,
             prdRepository: mockPRDRepo,
-            templateRepository: mockTemplateRepo
+            templateRepository: mockTemplateRepo,
+            contextExtractor: SectionContextExtractor()
         )
 
         // When: Execute use case
@@ -106,7 +107,8 @@ final class GeneratePRDUseCaseSpec: XCTestCase {
         let useCase = GeneratePRDUseCase(
             aiProvider: mockAI,
             prdRepository: mockPRDRepo,
-            templateRepository: mockTemplateRepo
+            templateRepository: mockTemplateRepo,
+            contextExtractor: SectionContextExtractor()
         )
 
         // When: Execute with template
@@ -171,7 +173,8 @@ final class GeneratePRDUseCaseSpec: XCTestCase {
             prdRepository: mockPRDRepo,
             templateRepository: mockTemplateRepo,
             codebaseRepository: mockCodebaseRepo,
-            embeddingGenerator: mockEmbedding
+            embeddingGenerator: mockEmbedding,
+            contextExtractor: SectionContextExtractor()
         )
 
         // When: Execute with codebase
@@ -212,7 +215,8 @@ final class GeneratePRDUseCaseSpec: XCTestCase {
         let useCase = GeneratePRDUseCase(
             aiProvider: mockAI,
             prdRepository: mockPRDRepo,
-            templateRepository: mockTemplateRepo
+            templateRepository: mockTemplateRepo,
+            contextExtractor: SectionContextExtractor()
         )
 
         // When/Then: Should throw validation error
@@ -243,7 +247,8 @@ final class GeneratePRDUseCaseSpec: XCTestCase {
         let useCase = GeneratePRDUseCase(
             aiProvider: mockAI,
             prdRepository: mockPRDRepo,
-            templateRepository: mockTemplateRepo
+            templateRepository: mockTemplateRepo,
+            contextExtractor: SectionContextExtractor()
         )
 
         // When/Then: Should throw error
@@ -276,7 +281,8 @@ final class GeneratePRDUseCaseSpec: XCTestCase {
         let useCase = GeneratePRDUseCase(
             aiProvider: mockAI,
             prdRepository: mockPRDRepo,
-            templateRepository: mockTemplateRepo
+            templateRepository: mockTemplateRepo,
+            contextExtractor: SectionContextExtractor()
         )
 
         // When/Then: Should propagate AI error
@@ -322,7 +328,8 @@ final class GeneratePRDUseCaseSpec: XCTestCase {
         let useCase = GeneratePRDUseCase(
             aiProvider: mockAI,
             prdRepository: mockPRDRepo,
-            templateRepository: mockTemplateRepo
+            templateRepository: mockTemplateRepo,
+            contextExtractor: SectionContextExtractor()
         )
 
         // When: Execute use case

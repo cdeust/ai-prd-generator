@@ -1,6 +1,5 @@
 import Foundation
 import Domain
-import InfrastructureCore
 
 /// PostgreSQL full-text search implementation for standalone skill
 /// Implements database-level BM25 ranking for scalability
@@ -63,8 +62,7 @@ public struct PostgreSQLFullTextSearch: FullTextSearchPort, Sendable {
 
         return try await databaseClient.callRPC(
             function: rpcFunction,
-            parameters: parameters,
-            responseType: [FullTextSearchResultDTO].self
+            parameters: parameters
         )
     }
 
@@ -83,8 +81,7 @@ public struct PostgreSQLFullTextSearch: FullTextSearchPort, Sendable {
 
         return try await databaseClient.callRPC(
             function: rpcFunction,
-            parameters: parameters,
-            responseType: [FileFullTextSearchResultDTO].self
+            parameters: parameters
         )
     }
 

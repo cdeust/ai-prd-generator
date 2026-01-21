@@ -9,11 +9,13 @@ struct SectionStrategySelector: Sendable {
 
     init(
         aiProvider: AIProviderPort,
-        intelligenceTracker: IntelligenceTrackerService?
+        intelligenceTracker: IntelligenceTrackerService?,
+        verifier: LLMResponseVerifier? = nil
     ) {
         self.strategyRecommender = StrategyRecommendationService(
             aiProvider: aiProvider,
-            intelligenceTracker: intelligenceTracker
+            intelligenceTracker: intelligenceTracker,
+            verifier: verifier
         )
         self.intelligenceTracker = intelligenceTracker
     }

@@ -325,6 +325,7 @@ final class HybridSearchProductionValidation: XCTestCase {
             id: id,
             fileId: UUID(),
             codebaseId: UUID(),
+            projectId: UUID(),
             filePath: "test.swift",
             content: "test content",
             contentHash: "hash",
@@ -478,6 +479,7 @@ private final class MockCodebaseRepository: CodebaseRepositoryPort {
     func findProjectByRepository(url: String, branch: String) async throws -> CodebaseProject? { fatalError() }
     func updateProject(_ project: CodebaseProject) async throws -> CodebaseProject { fatalError() }
     func deleteProject(_ id: UUID) async throws { fatalError() }
+    func updateProjectIndexingError(projectId: UUID, error: String) async throws { fatalError() }
     func listProjects(limit: Int, offset: Int) async throws -> [CodebaseProject] { fatalError() }
     func saveFiles(_ files: [CodeFile], projectId: UUID) async throws -> [CodeFile] { fatalError() }
     func addFile(_ file: CodeFile) async throws -> CodeFile { fatalError() }

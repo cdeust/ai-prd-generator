@@ -20,7 +20,7 @@ public final class GeminiProvider: AIProviderPort, Sendable {
 
     public init(
         apiKey: String,
-        model: String = "gemini-2.5-pro-latest",
+        model: String = "gemini-3.0-pro",
         baseURL: URL = URL(string: "https://generativelanguage.googleapis.com/v1beta")!
     ) {
         self.apiKey = apiKey
@@ -32,7 +32,8 @@ public final class GeminiProvider: AIProviderPort, Sendable {
 
     public func generateText(
         prompt: String,
-        temperature: Double
+        temperature: Double,
+        extendedThinking: Bool? = true
     ) async throws -> String {
         guard !apiKey.isEmpty else {
             throw AIProviderError.authenticationFailed
@@ -40,7 +41,8 @@ public final class GeminiProvider: AIProviderPort, Sendable {
 
         let response = try await performGenerateContent(
             prompt: prompt,
-            temperature: temperature
+            temperature: temperature,
+            extendedThinking: extendedThinking ?? true
         )
 
         return response
@@ -48,7 +50,8 @@ public final class GeminiProvider: AIProviderPort, Sendable {
 
     public func streamText(
         prompt: String,
-        temperature: Double
+        temperature: Double,
+        extendedThinking: Bool? = true
     ) async throws -> AsyncStream<String> {
         guard !apiKey.isEmpty else {
             throw AIProviderError.authenticationFailed
@@ -56,24 +59,27 @@ public final class GeminiProvider: AIProviderPort, Sendable {
 
         return try await performStreamingContent(
             prompt: prompt,
-            temperature: temperature
+            temperature: temperature,
+            extendedThinking: extendedThinking ?? true
         )
     }
 
     public var providerName: String { "Gemini" }
     public var modelName: String { model }
-    public var contextWindowSize: Int { 2_000_000 }  // Gemini 2.5 Pro: 2M tokens
+    public var contextWindowSize: Int { 2_000_000 }  // Gemini 3.0 Pro: 2M tokens
 
     // MARK: - Private Methods
 
     private func performGenerateContent(
         prompt: String,
-        temperature: Double
+        temperature: Double,
+        extendedThinking: Bool
     ) async throws -> String {
         let request = try createRequest(
             prompt: prompt,
             temperature: temperature,
-            stream: false
+            stream: false,
+            extendedThinking: extendedThinking
         )
 
         let (data, response) = try await URLSession.shared.data(for: request)
@@ -99,12 +105,14 @@ public final class GeminiProvider: AIProviderPort, Sendable {
 
     private func performStreamingContent(
         prompt: String,
-        temperature: Double
+        temperature: Double,
+        extendedThinking: Bool
     ) async throws -> AsyncStream<String> {
         let request = try createRequest(
             prompt: prompt,
             temperature: temperature,
-            stream: true
+            stream: true,
+            extendedThinking: extendedThinking
         )
 
         let (bytes, response) = try await URLSession.shared.bytes(for: request)
@@ -136,7 +144,8 @@ public final class GeminiProvider: AIProviderPort, Sendable {
     private func createRequest(
         prompt: String,
         temperature: Double,
-        stream: Bool
+        stream: Bool,
+        extendedThinking: Bool
     ) throws -> URLRequest {
         let method = stream ? "streamGenerateContent" : "generateContent"
         var urlComponents = URLComponents(
@@ -161,7 +170,8 @@ public final class GeminiProvider: AIProviderPort, Sendable {
             ],
             generationConfig: GeminiGenerationConfig(
                 maxOutputTokens: nil,  // Omit to let model decide when to stop naturally
-                temperature: temperature
+                temperature: temperature,
+                thinkingLevel: extendedThinking ? "HIGH" : nil  // Gemini 3.0: HIGH thinking level
             )
         )
 

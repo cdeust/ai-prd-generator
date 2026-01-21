@@ -26,7 +26,8 @@ struct SectionGeneration: Sendable {
         interactionHandler: UserInteractionPort? = nil,
         thinkingOrchestrator: ThinkingOrchestratorUseCase? = nil,
         intelligenceTracker: IntelligenceTrackerService? = nil,
-        verificationService: ChainOfVerificationService? = nil
+        verificationService: ChainOfVerificationService? = nil,
+        llmVerifier: LLMResponseVerifier? = nil
     ) {
         self.aiProvider = aiProvider
         self.promptBuilder = promptBuilder
@@ -36,18 +37,29 @@ struct SectionGeneration: Sendable {
         self.interactionHandler = interactionHandler
         self.thinkingOrchestrator = thinkingOrchestrator
         self.sectionVerification = SectionVerification(verificationService: verificationService)
+
+        // Use provided verifier (DRY - created once in factory with 80% threshold)
+        let verifier = llmVerifier ?? LLMResponseVerifier(
+            verificationService: verificationService,
+            intelligenceTracker: intelligenceTracker,
+            verificationThreshold: 0.8
+        )
+
         self.strategySelector = SectionStrategySelector(
             aiProvider: aiProvider,
-            intelligenceTracker: intelligenceTracker
+            intelligenceTracker: intelligenceTracker,
+            verifier: verifier
         )
         self.llmTracker = SectionLLMTracker(
             intelligenceTracker: intelligenceTracker,
             aiProvider: aiProvider
         )
+
         self.contentGenerator = SectionContentGenerator(
             aiProvider: aiProvider,
             thinkingOrchestrator: thinkingOrchestrator,
-            llmTracker: llmTracker
+            llmTracker: llmTracker,
+            verifier: verifier
         )
         self.clarificationCollector = SectionClarificationCollector(
             clarificationService: clarificationService,

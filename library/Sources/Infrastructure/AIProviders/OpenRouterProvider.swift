@@ -44,7 +44,8 @@ public final class OpenRouterProvider: AIProviderPort, Sendable {
 
     public func generateText(
         prompt: String,
-        temperature: Double
+        temperature: Double,
+        extendedThinking: Bool? = true
     ) async throws -> String {
         guard !apiKey.isEmpty else {
             throw AIProviderError.authenticationFailed
@@ -52,7 +53,8 @@ public final class OpenRouterProvider: AIProviderPort, Sendable {
 
         let response = try await performChatCompletion(
             prompt: prompt,
-            temperature: temperature
+            temperature: temperature,
+            extendedThinking: extendedThinking ?? true
         )
 
         return response
@@ -60,7 +62,8 @@ public final class OpenRouterProvider: AIProviderPort, Sendable {
 
     public func streamText(
         prompt: String,
-        temperature: Double
+        temperature: Double,
+        extendedThinking: Bool? = true
     ) async throws -> AsyncStream<String> {
         guard !apiKey.isEmpty else {
             throw AIProviderError.authenticationFailed
@@ -68,7 +71,8 @@ public final class OpenRouterProvider: AIProviderPort, Sendable {
 
         return try await performStreamingCompletion(
             prompt: prompt,
-            temperature: temperature
+            temperature: temperature,
+            extendedThinking: extendedThinking ?? true
         )
     }
 
@@ -80,12 +84,16 @@ public final class OpenRouterProvider: AIProviderPort, Sendable {
         // Different models have different context windows
         if model.contains("claude-sonnet-4-5") || model.contains("claude-3-5-sonnet") {
             return 200_000  // Claude Sonnet: 200K tokens
+        } else if model.contains("gpt-5") {
+            return 200_000  // GPT-5.2: 200K tokens
         } else if model.contains("gpt-4") {
             return 128_000  // GPT-4: 128K tokens
         } else if model.contains("gpt-3.5-turbo") {
             return 16_385   // GPT-3.5 Turbo: 16K tokens
+        } else if model.contains("gemini-3") {
+            return 2_000_000  // Gemini 3.0: 2M tokens
         } else if model.contains("gemini") {
-            return 128_000  // Gemini: 128K tokens
+            return 128_000  // Older Gemini: 128K tokens
         }
 
         // Conservative default for unknown models
@@ -96,12 +104,14 @@ public final class OpenRouterProvider: AIProviderPort, Sendable {
 
     private func performChatCompletion(
         prompt: String,
-        temperature: Double
+        temperature: Double,
+        extendedThinking: Bool
     ) async throws -> String {
         let request = try createRequest(
             prompt: prompt,
             temperature: temperature,
-            stream: false
+            stream: false,
+            extendedThinking: extendedThinking
         )
 
         let (data, response) = try await URLSession.shared.data(for: request)
@@ -127,12 +137,14 @@ public final class OpenRouterProvider: AIProviderPort, Sendable {
 
     private func performStreamingCompletion(
         prompt: String,
-        temperature: Double
+        temperature: Double,
+        extendedThinking: Bool
     ) async throws -> AsyncStream<String> {
         let request = try createRequest(
             prompt: prompt,
             temperature: temperature,
-            stream: true
+            stream: true,
+            extendedThinking: extendedThinking
         )
 
         let (bytes, response) = try await URLSession.shared.bytes(for: request)
@@ -165,7 +177,8 @@ public final class OpenRouterProvider: AIProviderPort, Sendable {
     private func createRequest(
         prompt: String,
         temperature: Double,
-        stream: Bool
+        stream: Bool,
+        extendedThinking: Bool
     ) throws -> URLRequest {
         let url = baseURL.appendingPathComponent("chat/completions")
         var request = URLRequest(url: url)
@@ -185,18 +198,17 @@ public final class OpenRouterProvider: AIProviderPort, Sendable {
             request.setValue(siteName, forHTTPHeaderField: "X-Title")
         }
 
-        // Reuse OpenAI request DTO (100% API compatible)
-        let message = OpenAIChatMessage(
-            role: "user",
-            content: prompt
-        )
-
-        let body = OpenAIChatCompletionRequest(
+        // Use OpenRouter request DTO with reasoning support
+        let body = OpenRouterChatCompletionRequest(
             model: model,
-            messages: [message],
+            messages: [["role": "user", "content": prompt]],
             maxTokens: nil,
             temperature: temperature,
-            stream: stream
+            stream: stream,
+            reasoning: extendedThinking ? OpenRouterReasoningConfig(
+                enabled: true,
+                maxTokens: 50000  // OpenRouter: 50K token budget for reasoning
+            ) : nil
         )
 
         request.httpBody = try JSONEncoder().encode(body)

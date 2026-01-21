@@ -92,8 +92,7 @@ public actor PostgreSQLClient: PostgreSQLDatabasePort {
 
     public func callRPC<T: Decodable>(
         function: String,
-        parameters: [String: Any],
-        responseType: T.Type
+        parameters: [String: Any]
     ) async throws -> T {
         let data = try await callRPC(function: function, parameters: parameters)
         let decoder = JSONDecoder()
@@ -165,7 +164,7 @@ public actor PostgreSQLClient: PostgreSQLDatabasePort {
             } else if let data = param as? Data {
                 try binds.append(data)
             } else if let floatArray = param as? [Float] {
-                try binds.append(floatArray)
+                binds.append(floatArray)
             } else {
                 binds.append(String(describing: param))
             }

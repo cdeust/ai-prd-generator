@@ -58,6 +58,7 @@ public enum MockFactory {
     // MARK: - Test Domain Objects
 
     public static func createPRDRequest(
+        userId: UUID = UUID(),
         title: String = "Test PRD",
         description: String = "Test description",
         requirements: [Requirement] = [],
@@ -65,6 +66,7 @@ public enum MockFactory {
         templateId: UUID? = nil
     ) -> PRDRequest {
         PRDRequest(
+            userId: userId,
             title: title,
             description: description,
             requirements: requirements,
@@ -112,13 +114,16 @@ public enum MockFactory {
 
     public static func createCodeFile(
         id: UUID = UUID(),
+        codebaseId: UUID = UUID(),
+        projectId: UUID = UUID(),
         filePath: String = "test/Example.swift",
         language: ProgrammingLanguage? = .swift,
         fileSize: Int = 1024
     ) -> CodeFile {
         CodeFile(
             id: id,
-            codebaseId: UUID(),
+            codebaseId: codebaseId,
+            projectId: projectId,
             filePath: filePath,
             fileHash: "mock-hash",
             fileSize: fileSize,
@@ -143,11 +148,13 @@ public enum MockFactory {
 
     public static func createPRDDocument(
         id: UUID = UUID(),
+        userId: UUID = UUID(),
         title: String = "Test PRD",
         sections: [PRDSection] = []
     ) -> PRDDocument {
         PRDDocument(
             id: id,
+            userId: userId,
             title: title,
             sections: sections.isEmpty ? defaultPRDSections() : sections,
             metadata: DocumentMetadata(

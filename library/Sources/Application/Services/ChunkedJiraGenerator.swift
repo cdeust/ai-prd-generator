@@ -6,13 +6,16 @@ import Domain
 public struct ChunkedJiraGenerator: Sendable {
     private let aiProvider: AIProviderPort
     private let tokenizer: TokenizerPort?
+    private let verifier: LLMResponseVerifier?
 
     public init(
         aiProvider: AIProviderPort,
-        tokenizer: TokenizerPort? = nil
+        tokenizer: TokenizerPort? = nil,
+        verifier: LLMResponseVerifier? = nil
     ) {
         self.aiProvider = aiProvider
         self.tokenizer = tokenizer
+        self.verifier = verifier
     }
 
     /// Generate JIRA tickets from PRD using multi-pass (one section at a time)
@@ -70,6 +73,22 @@ public struct ChunkedJiraGenerator: Sendable {
         """
 
         let response = try await aiProvider.generateText(prompt: prompt, temperature: 0.3)
+
+        // Apply Chain of Verification to JIRA ticket generation
+        if let verifier = verifier {
+            let context = "JIRA ticket generation for section: \(section.title)"
+            let verificationResult = try await verifier.verifyResponse(
+                prompt: prompt,
+                response: response,
+                context: context,
+                verificationType: .prdQuality
+            )
+
+            if !verificationResult.verified {
+                print("⚠️ [ChunkedJiraGenerator] Ticket generation verification failed - using response with caution")
+            }
+        }
+
         return parseTicketsFromResponse(response)
     }
 

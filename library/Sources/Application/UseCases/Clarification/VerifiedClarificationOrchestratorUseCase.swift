@@ -77,12 +77,14 @@ public actor VerifiedClarificationOrchestratorUseCase {
     public func submitAnswer(
         session: ClarificationSession<String, Int, String>,
         questionId: UUID,
-        answer: String
+        answer: String,
+        userWantsToProceed: Bool = false
     ) async throws -> VerifiedClarificationResult {
         let result = try await baseOrchestrator.submitAnswer(
             session: session,
             questionId: questionId,
-            answer: answer
+            answer: answer,
+            userWantsToProceed: userWantsToProceed
         )
 
         switch result {
@@ -100,6 +102,9 @@ public actor VerifiedClarificationOrchestratorUseCase {
 
         case .continueWithQuestions(let updatedSession):
             return .continueWithQuestions(updatedSession)
+
+        case .readyToComplete(let updatedSession, let completeness):
+            return .readyToComplete(updatedSession, currentCompleteness: completeness)
         }
     }
 

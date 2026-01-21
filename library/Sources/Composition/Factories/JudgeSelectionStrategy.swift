@@ -142,8 +142,6 @@ public actor JudgeSelectionStrategy {
             return "OpenRouter"
         case .bedrock:
             return "AWS Bedrock"
-        case .mock:
-            return "Mock Provider"
         }
     }
 }

@@ -12,13 +12,21 @@ actor BedrockPayloadBuilder {
         for modelId: String,
         prompt: String,
         temperature: Double,
-        stream: Bool
+        stream: Bool,
+        extendedThinking: Bool
     ) throws -> Data {
         if modelId.hasPrefix("anthropic.") {
             return try buildAnthropicPayload(
                 prompt: prompt,
                 temperature: temperature,
-                stream: stream
+                stream: stream,
+                extendedThinking: extendedThinking
+            )
+        } else if modelId.hasPrefix("amazon.nova") {
+            return try buildNovaPayload(
+                prompt: prompt,
+                temperature: temperature,
+                extendedThinking: extendedThinking
             )
         } else if modelId.hasPrefix("amazon.titan") {
             return try buildTitanPayload(
@@ -42,9 +50,10 @@ actor BedrockPayloadBuilder {
     private func buildAnthropicPayload(
         prompt: String,
         temperature: Double,
-        stream: Bool
+        stream: Bool,
+        extendedThinking: Bool
     ) throws -> Data {
-        let payload: [String: Any] = [
+        var payload: [String: Any] = [
             "anthropic_version": "bedrock-2023-05-31",
             "max_tokens": 4096,
             "messages": [
@@ -52,6 +61,40 @@ actor BedrockPayloadBuilder {
             ],
             "temperature": temperature
         ]
+
+        // Add extended thinking for Claude models (50K token budget)
+        if extendedThinking {
+            payload["thinking"] = [
+                "type": "enabled",
+                "budget_tokens": 50000
+            ]
+        }
+
+        return try JSONSerialization.data(withJSONObject: payload)
+    }
+
+    // MARK: - Nova Payload
+
+    private func buildNovaPayload(
+        prompt: String,
+        temperature: Double,
+        extendedThinking: Bool
+    ) throws -> Data {
+        var payload: [String: Any] = [
+            "inputText": prompt,
+            "textGenerationConfig": [
+                "maxTokenCount": 4096,
+                "temperature": temperature
+            ]
+        ]
+
+        // Add extended thinking for Nova models
+        if extendedThinking {
+            payload["reasoningConfig"] = [
+                "type": "enabled",
+                "maxReasoningEffort": "high"
+            ]
+        }
 
         return try JSONSerialization.data(withJSONObject: payload)
     }

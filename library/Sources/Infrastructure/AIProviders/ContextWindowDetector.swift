@@ -8,10 +8,10 @@ import FoundationModels
 /// Single Responsibility: Runtime context window size detection and adaptation
 /// Following naming convention: {Purpose}Detector
 @available(iOS 26.0, macOS 26.0, *)
-public final class ContextWindowDetector: Sendable {
+public final class ContextWindowDetector: @unchecked Sendable {
 
     /// Detected context window size (learned from runtime behavior)
-    /// Thread-safe access via lock
+    /// Thread-safe access via lock (mutable state protected by NSLock)
     private let lock = NSLock()
     private var detectedSize: Int
 

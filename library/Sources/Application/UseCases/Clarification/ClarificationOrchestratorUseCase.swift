@@ -4,26 +4,23 @@ import Domain
 /// Orchestrates multi-turn clarification dialogue to enrich PRD requests
 ///
 /// Professional implementation:
-/// - Max rounds configurable (default: 5)
+/// - Infinite rounds - purely user-driven stopping
 /// - Completeness threshold configurable (default: 0.9)
 /// - Temperature configurable for analysis
-/// - Iterative refinement until complete or max rounds reached
+/// - Returns .readyToComplete when threshold reached, user decides to proceed or continue
 /// - Generates PRD internally when clarification complete (library owns full flow)
 public actor ClarificationOrchestratorUseCase {
     private let analyzer: RequirementAnalyzerService
     private let prdGenerator: GeneratePRDUseCase
-    private let maxRounds: Int
     private let completenessThreshold: Double
 
     public init(
         analyzer: RequirementAnalyzerService,
         prdGenerator: GeneratePRDUseCase,
-        maxRounds: Int = 3,
         completenessThreshold: Double = 0.9
     ) {
         self.analyzer = analyzer
         self.prdGenerator = prdGenerator
-        self.maxRounds = maxRounds
         self.completenessThreshold = completenessThreshold
     }
 
@@ -62,12 +59,14 @@ public actor ClarificationOrchestratorUseCase {
     ///   - session: Current clarification session
     ///   - questionId: ID of question being answered
     ///   - answer: User's answer
-    /// - Returns: Result indicating completion with PRD or continuation with new questions
+    ///   - userWantsToProceed: If true, force completion regardless of threshold (user decision)
+    /// - Returns: Result indicating completion with PRD, ready to complete, or continuation with new questions
     /// - Throws: AIProviderError if re-analysis or PRD generation fails
     public func submitAnswer(
         session: ClarificationSession<String, Int, String>,
         questionId: UUID,
-        answer: String
+        answer: String,
+        userWantsToProceed: Bool = false
     ) async throws -> ClarificationResult {
         let updatedSession = session.withAnswer(questionId: questionId, answer: answer)
 
@@ -81,22 +80,21 @@ public actor ClarificationOrchestratorUseCase {
             return .continueWithQuestions(updatedSession)
         }
 
-        // All questions answered - check if we should complete or continue to next round
-        // ALWAYS complete if max rounds reached (safety limit)
-        if updatedSession.round >= maxRounds {
-            let enrichedRequest = buildEnrichedRequest(from: updatedSession)
-            let document = try await prdGenerator.execute(enrichedRequest)
+        // All questions answered - check if user wants to proceed or we should continue
+        let updatedRequest = buildEnrichedRequest(from: updatedSession)
+
+        // If user explicitly wants to proceed, generate PRD immediately
+        if userWantsToProceed {
+            let document = try await prdGenerator.execute(updatedRequest)
             return .complete(document)
         }
 
-        // Re-analyze with enriched context to check if we're now complete
-        let updatedRequest = buildEnrichedRequest(from: updatedSession)
+        // Re-analyze with enriched context to check completeness
         let analysis = try await analyzer.analyzeRequirements(updatedRequest)
 
-        // If completeness threshold reached, generate PRD
+        // If completeness threshold reached, offer user choice to proceed or continue
         if analysis.completenessScore >= completenessThreshold {
-            let document = try await prdGenerator.execute(updatedRequest)
-            return .complete(document)
+            return .readyToComplete(updatedSession, currentCompleteness: analysis.completenessScore)
         }
 
         // Filter out already asked questions to avoid duplicates

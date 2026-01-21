@@ -20,7 +20,7 @@ public final class OpenAIProvider: AIProviderPort, Sendable {
 
     public init(
         apiKey: String,
-        model: String = "gpt-5-preview",
+        model: String = "gpt-5.2",
         baseURL: URL = URL(string: "https://api.openai.com/v1")!
     ) {
         self.apiKey = apiKey
@@ -32,7 +32,8 @@ public final class OpenAIProvider: AIProviderPort, Sendable {
 
     public func generateText(
         prompt: String,
-        temperature: Double
+        temperature: Double,
+        extendedThinking: Bool? = true
     ) async throws -> String {
         guard !apiKey.isEmpty else {
             throw AIProviderError.authenticationFailed
@@ -40,7 +41,8 @@ public final class OpenAIProvider: AIProviderPort, Sendable {
 
         let response = try await performChatCompletion(
             prompt: prompt,
-            temperature: temperature
+            temperature: temperature,
+            extendedThinking: extendedThinking ?? true
         )
 
         return response
@@ -48,7 +50,8 @@ public final class OpenAIProvider: AIProviderPort, Sendable {
 
     public func streamText(
         prompt: String,
-        temperature: Double
+        temperature: Double,
+        extendedThinking: Bool? = true
     ) async throws -> AsyncStream<String> {
         guard !apiKey.isEmpty else {
             throw AIProviderError.authenticationFailed
@@ -56,7 +59,8 @@ public final class OpenAIProvider: AIProviderPort, Sendable {
 
         return try await performStreamingCompletion(
             prompt: prompt,
-            temperature: temperature
+            temperature: temperature,
+            extendedThinking: extendedThinking ?? true
         )
     }
 
@@ -75,12 +79,14 @@ public final class OpenAIProvider: AIProviderPort, Sendable {
 
     private func performChatCompletion(
         prompt: String,
-        temperature: Double
+        temperature: Double,
+        extendedThinking: Bool
     ) async throws -> String {
         let request = try createRequest(
             prompt: prompt,
             temperature: temperature,
-            stream: false
+            stream: false,
+            extendedThinking: extendedThinking
         )
 
         let (data, response) = try await URLSession.shared.data(for: request)
@@ -105,12 +111,14 @@ public final class OpenAIProvider: AIProviderPort, Sendable {
 
     private func performStreamingCompletion(
         prompt: String,
-        temperature: Double
+        temperature: Double,
+        extendedThinking: Bool
     ) async throws -> AsyncStream<String> {
         let request = try createRequest(
             prompt: prompt,
             temperature: temperature,
-            stream: true
+            stream: true,
+            extendedThinking: extendedThinking
         )
 
         let (bytes, response) = try await URLSession.shared.bytes(for: request)
@@ -142,7 +150,8 @@ public final class OpenAIProvider: AIProviderPort, Sendable {
     private func createRequest(
         prompt: String,
         temperature: Double,
-        stream: Bool
+        stream: Bool,
+        extendedThinking: Bool
     ) throws -> URLRequest {
         let url = baseURL.appendingPathComponent("chat/completions")
         var request = URLRequest(url: url)
@@ -155,7 +164,8 @@ public final class OpenAIProvider: AIProviderPort, Sendable {
             messages: [OpenAIChatMessage(role: "user", content: prompt)],
             maxTokens: nil,  // OpenAI: nil = generate until natural completion
             temperature: temperature,
-            stream: stream
+            stream: stream,
+            reasoningEffort: extendedThinking ? "high" : nil  // GPT-5.2: high reasoning effort
         )
 
         request.httpBody = try JSONEncoder().encode(body)

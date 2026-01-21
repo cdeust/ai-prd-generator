@@ -15,12 +15,13 @@ public actor MockAIProvider: AIProviderPort {
 
     public let providerName: String
     public let modelName: String
+    public let contextWindowSize: Int
 
     private var responseMode: ResponseMode
     private var callCount: Int = 0
     private var lastPrompt: String?
-    private var lastMaxTokens: Int?
     private var lastTemperature: Double?
+    private var lastExtendedThinking: Bool?
     private var sequenceIndex: Int = 0
 
     // MARK: - Initialization
@@ -28,10 +29,12 @@ public actor MockAIProvider: AIProviderPort {
     public init(
         providerName: String = "MockProvider",
         modelName: String = "mock-model-1",
+        contextWindowSize: Int = 128000,
         responseMode: ResponseMode = .success("Mock response")
     ) {
         self.providerName = providerName
         self.modelName = modelName
+        self.contextWindowSize = contextWindowSize
         self.responseMode = responseMode
     }
 
@@ -39,13 +42,13 @@ public actor MockAIProvider: AIProviderPort {
 
     public func generateText(
         prompt: String,
-        maxTokens: Int,
-        temperature: Double
+        temperature: Double,
+        extendedThinking: Bool? = true
     ) async throws -> String {
         callCount += 1
         lastPrompt = prompt
-        lastMaxTokens = maxTokens
         lastTemperature = temperature
+        lastExtendedThinking = extendedThinking
 
         switch responseMode {
         case .success(let response):
@@ -74,21 +77,21 @@ public actor MockAIProvider: AIProviderPort {
 
     public func streamText(
         prompt: String,
-        maxTokens: Int,
-        temperature: Double
+        temperature: Double,
+        extendedThinking: Bool? = true
     ) async throws -> AsyncStream<String> {
         callCount += 1
         lastPrompt = prompt
-        lastMaxTokens = maxTokens
         lastTemperature = temperature
+        lastExtendedThinking = extendedThinking
 
         return AsyncStream { continuation in
             Task {
                 do {
-                    let text = try await generateText(
+                    let text = try await self.generateText(
                         prompt: prompt,
-                        maxTokens: maxTokens,
-                        temperature: temperature
+                        temperature: temperature,
+                        extendedThinking: extendedThinking
                     )
 
                     // Simulate streaming by chunking
@@ -123,19 +126,19 @@ public actor MockAIProvider: AIProviderPort {
         lastPrompt
     }
 
-    public func getLastMaxTokens() -> Int? {
-        lastMaxTokens
-    }
-
     public func getLastTemperature() -> Double? {
         lastTemperature
+    }
+
+    public func getLastExtendedThinking() -> Bool? {
+        lastExtendedThinking
     }
 
     public func reset() {
         callCount = 0
         lastPrompt = nil
-        lastMaxTokens = nil
         lastTemperature = nil
+        lastExtendedThinking = nil
         sequenceIndex = 0
     }
 

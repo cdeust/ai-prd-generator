@@ -1,5 +1,5 @@
 import XCTest
-@testable import Infrastructure
+@testable import InfrastructureCore
 @testable import Application
 @testable import Domain
 

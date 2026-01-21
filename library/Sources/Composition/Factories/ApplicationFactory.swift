@@ -14,6 +14,7 @@ public final class ApplicationFactory: @unchecked Sendable {
     private let useCaseBuilder: ApplicationUseCaseBuilder
     private var cachedDependencies: FactoryDependencies?
     private var cachedPromptService: PromptEngineeringService?
+    private var cachedVerifier: LLMResponseVerifier?
     private var repositoryConnection: RepositoryConnectionPort?
     private var codebaseRepository: CodebaseRepositoryPort?
 
@@ -59,14 +60,23 @@ public final class ApplicationFactory: @unchecked Sendable {
             dependencies: dependencies, intelligenceTracker: intelligenceTracker
         )
         let contextExtractor = SectionContextExtractor()
-        let requirementAnalyzer = RequirementAnalyzerService(
-            aiProvider: dependencies.aiProvider,
-            intelligenceTracker: intelligenceTracker
-        )
+
+        // Create verification service and LLM verifier (DRY - use cached if available)
         let verificationService = await getVerificationService(
             aiProvider: dependencies.aiProvider,
             evidenceRepository: dependencies.verificationEvidenceRepository
         )
+        let llmVerifier = getLLMResponseVerifier(
+            verificationService: verificationService,
+            intelligenceTracker: intelligenceTracker
+        )
+
+        let requirementAnalyzer = RequirementAnalyzerService(
+            aiProvider: dependencies.aiProvider,
+            intelligenceTracker: intelligenceTracker,
+            verifier: llmVerifier
+        )
+
         return GeneratePRDUseCase(
             aiProvider: dependencies.aiProvider,
             prdRepository: dependencies.prdRepository,
@@ -82,7 +92,8 @@ public final class ApplicationFactory: @unchecked Sendable {
             requirementAnalyzer: requirementAnalyzer,
             interactionHandler: interactionHandler,
             intelligenceTracker: intelligenceTracker,
-            verificationService: verificationService
+            verificationService: verificationService,
+            llmVerifier: llmVerifier
         )
     }
     private func createDependencies() async throws -> FactoryDependencies {
@@ -114,12 +125,10 @@ public final class ApplicationFactory: @unchecked Sendable {
             secretAccessKey: configuration.bedrockSecretAccessKey
         )
 
-        if #available(iOS 15.0, macOS 12.0, *) {
-            let factory = AIProviderFactory()
-            return try await factory.createProvider(from: providerConfig)
-        } else {
-            return MockAIProvider()
-        }
+        // API-based providers (OpenAI, Anthropic, Gemini, Bedrock, OpenRouter) work on all platforms
+        // Only Apple Intelligence requires macOS 26+ (checked inside AIProviderFactory)
+        let factory = AIProviderFactory()
+        return try await factory.createProvider(from: providerConfig)
     }
     private func wireUseCases(
         dependencies: FactoryDependencies
@@ -128,9 +137,20 @@ public final class ApplicationFactory: @unchecked Sendable {
         self.cachedPromptService = promptService
         let intelligenceTracker = getIntelligenceTracker()
 
+        // Create verification service and LLM verifier ONCE (DRY)
+        let verificationService = await getVerificationService(
+            aiProvider: dependencies.aiProvider,
+            evidenceRepository: dependencies.verificationEvidenceRepository
+        )
+        let llmVerifier = getLLMResponseVerifier(
+            verificationService: verificationService,
+            intelligenceTracker: intelligenceTracker
+        )
+
         let generatePRD = await useCaseBuilder.createGeneratePRDUseCase(
             dependencies: dependencies,
-            promptService: promptService
+            promptService: promptService,
+            llmVerifier: llmVerifier
         )
         let (listPRDs, getPRD) = useCaseBuilder.createPRDQueryUseCases(dependencies: dependencies)
         let sessionUseCases = useCaseBuilder.createSessionUseCases(
@@ -257,5 +277,29 @@ public final class ApplicationFactory: @unchecked Sendable {
             print("⚠️ [ApplicationFactory] VerificationService creation failed: \(error)")
             return nil
         }
+    }
+
+    /// Get LLM response verifier for Chain of Verification at each LLM step
+    /// Creates once with 80% threshold, caches and reuses across all services (DRY)
+    /// - Parameters:
+    ///   - verificationService: Chain of Verification service
+    ///   - intelligenceTracker: Intelligence tracker for logging
+    /// - Returns: Cached LLMResponseVerifier instance
+    private func getLLMResponseVerifier(
+        verificationService: ChainOfVerificationService?,
+        intelligenceTracker: IntelligenceTrackerService?
+    ) -> LLMResponseVerifier {
+        if let cached = cachedVerifier {
+            return cached
+        }
+
+        let verifier = LLMResponseVerifier(
+            verificationService: verificationService,
+            intelligenceTracker: intelligenceTracker,
+            verificationThreshold: 0.8  // 80% threshold for quality assurance
+        )
+        cachedVerifier = verifier
+        print("✅ [ApplicationFactory] LLMResponseVerifier created (threshold: 80%)")
+        return verifier
     }
 }

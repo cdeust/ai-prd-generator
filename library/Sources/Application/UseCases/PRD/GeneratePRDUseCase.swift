@@ -38,7 +38,8 @@ public struct GeneratePRDUseCase: Sendable {
         thinkingOrchestrator: ThinkingOrchestratorUseCase? = nil,
         intelligenceTracker: IntelligenceTrackerService? = nil,
         coherenceScorer: QuestionCoherenceScorer? = nil,
-        verificationService: ChainOfVerificationService? = nil
+        verificationService: ChainOfVerificationService? = nil,
+        llmVerifier: LLMResponseVerifier? = nil
     ) {
         self.aiProvider = aiProvider
         self.prdRepository = prdRepository
@@ -46,7 +47,19 @@ public struct GeneratePRDUseCase: Sendable {
         self.interactionHandler = interactionHandler
         self.requirementAnalyzer = requirementAnalyzer
         self.intelligenceTracker = intelligenceTracker
-        self.jiraGenerator = ChunkedJiraGenerator(aiProvider: aiProvider, tokenizer: tokenizer)
+
+        // Use provided verifier (DRY - created once in factory with 80% threshold)
+        let verifier = llmVerifier ?? LLMResponseVerifier(
+            verificationService: verificationService,
+            intelligenceTracker: intelligenceTracker,
+            verificationThreshold: 0.8
+        )
+
+        self.jiraGenerator = ChunkedJiraGenerator(
+            aiProvider: aiProvider,
+            tokenizer: tokenizer,
+            verifier: verifier
+        )
 
         let mockupAssociation = mockupRepository.map { MockupAssociationService(repository: $0) }
         self.traceUpdater = Phase1TraceUpdater(
@@ -80,7 +93,8 @@ public struct GeneratePRDUseCase: Sendable {
             interactionHandler: interactionHandler,
             thinkingOrchestrator: thinkingOrchestrator,
             intelligenceTracker: intelligenceTracker,
-            verificationService: verificationService
+            verificationService: verificationService,
+            llmVerifier: verifier
         )
     }
 

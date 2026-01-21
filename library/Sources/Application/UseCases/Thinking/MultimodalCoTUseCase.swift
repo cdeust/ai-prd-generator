@@ -26,7 +26,7 @@ public struct MultimodalCoTUseCase: Sendable {
         imageUrls: [String],
         constraints: [String]
     ) async throws -> MultimodalCoTResult {
-        guard let visionAnalysis = visionAnalysis else {
+        guard visionAnalysis != nil else {
             throw MultimodalError.visionAnalysisNotAvailable
         }
 

@@ -18,7 +18,8 @@ struct PRDUseCaseFactory {
 
     func createGeneratePRDUseCase(
         dependencies: FactoryDependencies,
-        promptService: PromptEngineeringService
+        promptService: PromptEngineeringService,
+        llmVerifier: LLMResponseVerifier? = nil
     ) async -> GeneratePRDUseCase {
         let ragFactory = RAGFactory(configuration: configuration)
         // Create intelligence tracker FIRST so it can be shared with context builder
@@ -30,18 +31,26 @@ struct PRDUseCaseFactory {
             aiProvider: dependencies.aiProvider, ragFactory: ragFactory, intelligenceTracker: intelligenceTracker
         )
 
+        // Create verification service for multi-judge evaluation
+        let verificationService = await createVerificationServiceSafely(
+            aiProvider: dependencies.aiProvider,
+            evidenceRepository: dependencies.verificationEvidenceRepository
+        )
+
+        // Use provided verifier or create one with 80% threshold (DRY - should be provided by factory)
+        let verifier = llmVerifier ?? LLMResponseVerifier(
+            verificationService: verificationService,
+            intelligenceTracker: intelligenceTracker,
+            verificationThreshold: 0.8
+        )
+
         // Create coherence scorer for filtering questions BEFORE asking
         // Both thresholds must pass: coherence >= 0.9, effectiveness >= 0.8 (against feature description)
         let coherenceScorer = QuestionCoherenceScorer(
             aiProvider: dependencies.aiProvider,
             coherenceThreshold: 0.9,
-            effectivenessThreshold: 0.8
-        )
-
-        // Create verification service for multi-judge evaluation
-        let verificationService = await createVerificationServiceSafely(
-            aiProvider: dependencies.aiProvider,
-            evidenceRepository: dependencies.verificationEvidenceRepository
+            effectivenessThreshold: 0.8,
+            verifier: verifier
         )
 
         return GeneratePRDUseCase(
@@ -58,7 +67,8 @@ struct PRDUseCaseFactory {
             contextBuilder: components.contextBuilder,
             requirementAnalyzer: RequirementAnalyzerService(
                 aiProvider: dependencies.aiProvider,
-                intelligenceTracker: intelligenceTracker
+                intelligenceTracker: intelligenceTracker,
+                verifier: verifier
             ),
             interactionHandler: aiComponentsFactory.createInteractionHandler(),
             thinkingOrchestrator: thinkingOrchestrator,

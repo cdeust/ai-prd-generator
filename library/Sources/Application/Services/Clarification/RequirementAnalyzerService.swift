@@ -4,17 +4,21 @@ import Domain
 /// Analyzes PRD requirements and generates clarification questions
 /// ALWAYS uses AI to analyze the request - no hardcoded fallbacks
 /// Tracks all LLM calls to DB via intelligenceTracker
+/// Applies Chain of Verification to all LLM responses
 public struct RequirementAnalyzerService: Sendable {
     private let aiProvider: AIProviderPort
     private let intelligenceTracker: IntelligenceTrackerService?
+    private let verifier: LLMResponseVerifier?
     private let promptBuilder: AnalysisPromptBuilder
 
     public init(
         aiProvider: AIProviderPort,
-        intelligenceTracker: IntelligenceTrackerService? = nil
+        intelligenceTracker: IntelligenceTrackerService? = nil,
+        verifier: LLMResponseVerifier? = nil
     ) {
         self.aiProvider = aiProvider
         self.intelligenceTracker = intelligenceTracker
+        self.verifier = verifier
         self.promptBuilder = AnalysisPromptBuilder()
     }
 
@@ -114,6 +118,22 @@ public struct RequirementAnalyzerService: Sendable {
         let startTime = Date()
         let response = try await aiProvider.generateText(prompt: prompt, temperature: 0.3)
         let latencyMs = Int(Date().timeIntervalSince(startTime) * 1000)
+
+        // Apply Chain of Verification to validate response
+        if let verifier = verifier {
+            let context = hasCodebase ? "Requirement analysis with codebase context" : "Standalone requirement analysis"
+            let verificationResult = try await verifier.verifyResponse(
+                prompt: prompt,
+                response: response,
+                context: context,
+                verificationType: .questionRelevance
+            )
+
+            if !verificationResult.verified {
+                print("⚠️ [RequirementAnalyzer] Verification failed - using response with caution")
+                // Continue with response but log the failure
+            }
+        }
 
         await trackAnalysisLLMCall(prompt: prompt, response: response, latencyMs: latencyMs, hasCodebase: hasCodebase)
         return parseXMLResponse(response)

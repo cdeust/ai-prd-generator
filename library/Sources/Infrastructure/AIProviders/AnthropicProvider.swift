@@ -35,7 +35,8 @@ public final class AnthropicProvider: AIProviderPort, Sendable {
 
     public func generateText(
         prompt: String,
-        temperature: Double
+        temperature: Double,
+        extendedThinking: Bool? = true
     ) async throws -> String {
         guard !apiKey.isEmpty else {
             throw AIProviderError.authenticationFailed
@@ -43,7 +44,8 @@ public final class AnthropicProvider: AIProviderPort, Sendable {
 
         let response = try await performMessageCompletion(
             prompt: prompt,
-            temperature: temperature
+            temperature: temperature,
+            extendedThinking: extendedThinking ?? true
         )
 
         return response
@@ -51,7 +53,8 @@ public final class AnthropicProvider: AIProviderPort, Sendable {
 
     public func streamText(
         prompt: String,
-        temperature: Double
+        temperature: Double,
+        extendedThinking: Bool? = true
     ) async throws -> AsyncStream<String> {
         guard !apiKey.isEmpty else {
             throw AIProviderError.authenticationFailed
@@ -59,7 +62,8 @@ public final class AnthropicProvider: AIProviderPort, Sendable {
 
         return try await performStreamingCompletion(
             prompt: prompt,
-            temperature: temperature
+            temperature: temperature,
+            extendedThinking: extendedThinking ?? true
         )
     }
 
@@ -71,12 +75,14 @@ public final class AnthropicProvider: AIProviderPort, Sendable {
 
     private func performMessageCompletion(
         prompt: String,
-        temperature: Double
+        temperature: Double,
+        extendedThinking: Bool
     ) async throws -> String {
         let request = try createRequest(
             prompt: prompt,
             temperature: temperature,
-            stream: false
+            stream: false,
+            extendedThinking: extendedThinking
         )
 
         let (data, response) = try await URLSession.shared.data(for: request)
@@ -101,12 +107,14 @@ public final class AnthropicProvider: AIProviderPort, Sendable {
 
     private func performStreamingCompletion(
         prompt: String,
-        temperature: Double
+        temperature: Double,
+        extendedThinking: Bool
     ) async throws -> AsyncStream<String> {
         let request = try createRequest(
             prompt: prompt,
             temperature: temperature,
-            stream: true
+            stream: true,
+            extendedThinking: extendedThinking
         )
 
         let (bytes, response) = try await URLSession.shared.bytes(for: request)
@@ -138,7 +146,8 @@ public final class AnthropicProvider: AIProviderPort, Sendable {
     private func createRequest(
         prompt: String,
         temperature: Double,
-        stream: Bool
+        stream: Bool,
+        extendedThinking: Bool
     ) throws -> URLRequest {
         let url = baseURL.appendingPathComponent("messages")
         var request = URLRequest(url: url)
@@ -152,7 +161,8 @@ public final class AnthropicProvider: AIProviderPort, Sendable {
             messages: [AnthropicMessage(role: "user", content: prompt)],
             maxTokens: 8192,  // Anthropic API requires this field (not optional) - using maximum reasonable value to avoid truncation
             temperature: temperature,
-            stream: stream
+            stream: stream,
+            thinking: extendedThinking ? .default : nil  // 50K token budget when enabled
         )
 
         request.httpBody = try JSONEncoder().encode(body)

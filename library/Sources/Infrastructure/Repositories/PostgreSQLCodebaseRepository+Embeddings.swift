@@ -52,7 +52,7 @@ extension PostgreSQLCodebaseRepository {
         )
 
         let rows = try decodeRows(from: data)
-        return try rows.compactMap { row -> (file: CodeFile, similarity: Float)? in
+        return rows.compactMap { row -> (file: CodeFile, similarity: Float)? in
             guard let fileData = row["file"] as? [String: Any],
                   let similarity = row["similarity"] as? Double else {
                 return nil

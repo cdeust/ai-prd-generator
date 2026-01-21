@@ -156,8 +156,10 @@ public struct Configuration: Sendable {
             return .anthropic
         case "gemini", "google":
             return .gemini
-        case "mock", "test", "demo":
-            return .mock
+        case "openrouter":
+            return .openRouter
+        case "bedrock", "aws":
+            return .bedrock
         default:
             return .appleFoundationModels
         }

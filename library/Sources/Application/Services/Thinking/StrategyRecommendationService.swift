@@ -5,13 +5,16 @@ import Domain
 public struct StrategyRecommendationService: Sendable {
     private let aiProvider: AIProviderPort
     private let intelligenceTracker: IntelligenceTrackerService?
+    private let verifier: LLMResponseVerifier?
 
     public init(
         aiProvider: AIProviderPort,
-        intelligenceTracker: IntelligenceTrackerService? = nil
+        intelligenceTracker: IntelligenceTrackerService? = nil,
+        verifier: LLMResponseVerifier? = nil
     ) {
         self.aiProvider = aiProvider
         self.intelligenceTracker = intelligenceTracker
+        self.verifier = verifier
     }
 
     /// Ask LLM to recommend thinking strategy for a PRD section
@@ -39,6 +42,21 @@ public struct StrategyRecommendationService: Sendable {
             response += chunk
         }
         let latencyMs = Int(Date().timeIntervalSince(startTime) * 1000)
+
+        // Apply Chain of Verification to strategy recommendation
+        if let verifier = verifier {
+            let context = "Strategy recommendation for PRD section: \(sectionType.displayName)"
+            let verificationResult = try await verifier.verifyResponse(
+                prompt: prompt,
+                response: response,
+                context: context,
+                verificationType: .prdQuality
+            )
+
+            if !verificationResult.verified {
+                print("⚠️ [StrategyRecommendationService] Strategy verification failed - using response with caution")
+            }
+        }
 
         await trackRecommendation(prdId: prdId, sectionType: sectionType, prompt: prompt, response: response, latencyMs: latencyMs)
         return parseStrategyResponse(response)

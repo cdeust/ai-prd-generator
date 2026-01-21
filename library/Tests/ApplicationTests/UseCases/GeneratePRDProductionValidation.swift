@@ -201,6 +201,7 @@ final class GeneratePRDProductionValidation: XCTestCase {
         case 0:
             // Basic request (no template, no codebase)
             return PRDRequest(
+                userId: UUID(),
                 title: randomTitle(),
                 description: randomDescription(),
                 requirements: randomRequirements()
@@ -209,6 +210,7 @@ final class GeneratePRDProductionValidation: XCTestCase {
         case 1:
             // With template
             return PRDRequest(
+                userId: UUID(),
                 title: randomTitle(),
                 description: randomDescription(),
                 requirements: randomRequirements(),
@@ -219,6 +221,7 @@ final class GeneratePRDProductionValidation: XCTestCase {
         case 2:
             // With codebase
             return PRDRequest(
+                userId: UUID(),
                 title: randomTitle(),
                 description: randomDescription(),
                 requirements: randomRequirements(),
@@ -375,7 +378,8 @@ final class GeneratePRDProductionValidation: XCTestCase {
         return GeneratePRDUseCase(
             aiProvider: mockAI,
             prdRepository: mockPRDRepo,
-            templateRepository: mockTemplateRepo
+            templateRepository: mockTemplateRepo,
+            contextExtractor: SectionContextExtractor()
         )
     }
 

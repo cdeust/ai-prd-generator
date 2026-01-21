@@ -84,8 +84,7 @@ public protocol PostgreSQLDatabasePort: Sendable {
     /// Call RPC function with typed response
     func callRPC<T: Decodable>(
         function: String,
-        parameters: [String: Any],
-        responseType: T.Type
+        parameters: [String: Any]
     ) async throws -> T
 
     // MARK: - Transaction Support

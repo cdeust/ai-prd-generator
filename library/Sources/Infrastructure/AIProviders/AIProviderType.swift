@@ -1,13 +1,12 @@
 import Foundation
 
 /// AI Provider Type Enumeration
-/// Defines supported provider types
+/// Defines supported provider types for production use
 public enum AIProviderType: Sendable {
     case openAI
     case anthropic
     case gemini
     case appleFoundationModels
-    case openRouter  // NEW: OpenRouter unified API (100+ models)
-    case bedrock     // NEW: AWS Bedrock (Claude, Titan, Llama)
-    case mock        // NEW: Mock provider for testing without API credentials
+    case openRouter  // OpenRouter unified API (100+ models)
+    case bedrock     // AWS Bedrock (Claude, Titan, Llama)
 }

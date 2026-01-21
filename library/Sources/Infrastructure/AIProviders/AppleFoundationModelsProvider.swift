@@ -56,8 +56,11 @@ public final class AppleFoundationModelsProvider: AIProviderPort, Sendable {
 
     public func generateText(
         prompt: String,
-        temperature: Double
+        temperature: Double,
+        extendedThinking: Bool? = true
     ) async throws -> String {
+        // Note: Apple Foundation Models does NOT support extended thinking mode
+        // Parameter is accepted for API compatibility but ignored
         #if canImport(FoundationModels)
         try validatePromptLength(prompt)
         let model = SystemLanguageModel.default
@@ -130,8 +133,11 @@ public final class AppleFoundationModelsProvider: AIProviderPort, Sendable {
 
     public func streamText(
         prompt: String,
-        temperature: Double
+        temperature: Double,
+        extendedThinking: Bool? = true
     ) async throws -> AsyncStream<String> {
+        // Note: Apple Foundation Models does NOT support extended thinking mode
+        // Parameter is accepted for API compatibility but ignored
         #if canImport(FoundationModels)
         try validatePromptLength(prompt)
         let model = SystemLanguageModel.default

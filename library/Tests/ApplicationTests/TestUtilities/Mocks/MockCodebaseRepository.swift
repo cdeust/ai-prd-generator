@@ -92,6 +92,10 @@ public actor MockPRDCodebaseRepository: CodebaseRepositoryPort {
         fatalError("Not implemented - not needed for PRD generation tests")
     }
 
+    public func updateProjectIndexingError(projectId: UUID, error: String) async throws {
+        fatalError("Not implemented - not needed for PRD generation tests")
+    }
+
     public func listProjects(limit: Int, offset: Int) async throws -> [CodebaseProject] {
         fatalError("Not implemented - not needed for PRD generation tests")
     }

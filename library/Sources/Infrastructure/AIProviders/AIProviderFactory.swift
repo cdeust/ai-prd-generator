@@ -5,7 +5,7 @@ import Domain
 /// Creates provider instances based on configuration
 /// Following Single Responsibility: Only handles provider instantiation
 /// Following Factory pattern for abstraction
-@available(iOS 15.0, macOS 12.0, *)
+/// API-based providers work on all platforms; only Apple Intelligence requires macOS 26+
 public final class AIProviderFactory {
     // MARK: - Initialization
 
@@ -33,8 +33,6 @@ public final class AIProviderFactory {
             return try createOpenRouterProvider(config: config)
         case .bedrock:
             return try await createBedrockProvider(config: config)
-        case .mock:
-            return createMockProvider()
         }
     }
 
@@ -138,9 +136,5 @@ public final class AIProviderFactory {
             secretAccessKey: secretAccessKey,
             modelId: config.model ?? "anthropic.claude-sonnet-4-5-20250929"
         )
-    }
-
-    private func createMockProvider() -> AIProviderPort {
-        return MockAIProvider()
     }
 }

@@ -58,11 +58,13 @@ struct ApplicationUseCaseBuilder {
 
     func createGeneratePRDUseCase(
         dependencies: FactoryDependencies,
-        promptService: PromptEngineeringService
+        promptService: PromptEngineeringService,
+        llmVerifier: LLMResponseVerifier? = nil
     ) async -> GeneratePRDUseCase {
         await prdUseCaseFactory.createGeneratePRDUseCase(
             dependencies: dependencies,
-            promptService: promptService
+            promptService: promptService,
+            llmVerifier: llmVerifier
         )
     }
 
