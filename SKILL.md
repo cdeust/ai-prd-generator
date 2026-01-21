@@ -11,7 +11,11 @@ I generate professional Product Requirements Documents using Chain of Verificati
 ## Capabilities
 
 ### 1. Chain of Verification (Quality Assurance)
-- **Multi-LLM Consensus**: 3+ AI judges independently review PRD quality
+- **Multi-LLM Consensus**: Multiple AI judges independently review PRD quality
+  - **Judge 1 (Me - Claude Code Session)**: I evaluate naturally in our conversation (no external API call)
+  - **Judge 2 (Apple Intelligence)**: On-device evaluation (macOS 26+, automatic, no API key)
+  - **Judge 3+ (Optional)**: OpenAI, Gemini, OpenRouter, or Bedrock (requires API keys)
+- **Zero-Config Operation**: 2 judges (Claude Code + Apple Intelligence) work without any API keys
 - **Consensus Resolution**: Identifies gaps, conflicts, and ambiguities through voting
 - **Quality Scoring**: Quantifies completeness, consistency, and clarity
 - **Automatic Refinement**: Iterates until consensus threshold met (default: 66%)
@@ -46,7 +50,12 @@ I generate professional Product Requirements Documents using Chain of Verificati
 The skill includes the full Swift library for local execution. On first use, I'll:
 
 1. **Build the library**: Compile Swift Package Manager project
-2. **Configure AI providers**: Use your API keys (Anthropic, OpenAI, or Apple Intelligence)
+2. **Configure AI providers**:
+   - **Inside Claude Code (current session)**: No API keys required!
+     - I (this Claude session) act as the primary verification judge
+     - Apple Intelligence included automatically (macOS 26+, no API key)
+     - Minimum 2 judges without any configuration
+   - **Optional**: Set OPENAI_API_KEY, GEMINI_API_KEY, OPENROUTER_API_KEY, or AWS credentials for 3-6 judge consensus
 3. **Initialize RAG database** (AUTOMATIC):
    - Check if DATABASE_URL is set
    - If NOT set → I will automatically start a local PostgreSQL container with pgvector
@@ -68,6 +77,50 @@ The skill includes the full Swift library for local execution. On first use, I'l
 
 **No manual setup required - it just works!**
 
+## Chain of Verification Judge Configuration
+
+**Inside Claude Code, I use myself and available AI models as judges:**
+
+### Automatic Judges (No Configuration Required)
+1. **Claude Code Session (Me)**
+   - I evaluate PRD quality naturally in our conversation
+   - No external Claude API calls made (detected via CLAUDECODE=1 environment variable)
+   - Primary judge that understands full context of our discussion
+
+2. **Apple Intelligence**
+   - On-device evaluation (macOS 26+, always attempted)
+   - Zero API calls, complete privacy
+   - Fast, local processing
+   - No API key required
+
+**Result:** Minimum 2-judge consensus without any configuration or API keys
+
+### Optional Additional Judges (Requires API Keys)
+3. **OpenAI GPT-4** - Set `OPENAI_API_KEY` environment variable
+4. **Gemini 2.5 Pro** - Set `GEMINI_API_KEY` environment variable
+5. **OpenRouter** - Set `OPENROUTER_API_KEY` (access to 100+ models)
+6. **AWS Bedrock** - Set `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`
+
+**Consensus Configuration:**
+- Default threshold: 66% agreement
+- Optimal setup: 3+ judges for strongest validation
+- Minimum setup: 2 judges (Claude Code + Apple Intelligence, zero config)
+
+**What the VerificationFactory does:**
+```
+🔍 Creating judge providers...
+📱 Running inside Claude Code (authenticated session)
+   Claude evaluates naturally in conversation - no API call needed
+   Using Apple Intelligence + OpenAI/Gemini for programmatic consensus
+✅ Apple Intelligence judge added (on-device)
+✅ OpenAI judge added (gpt-4o)  [if OPENAI_API_KEY set]
+✅ Created 2+ judge(s) for verification
+   Multi-LLM consensus enabled with diverse models
+```
+
+---
+
+## Usage Examples
 
 ### Basic PRD (No Codebase)
 ```

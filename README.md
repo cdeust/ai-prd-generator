@@ -237,7 +237,13 @@ Context-Aware PRD Generated
 
 ### 1. Chain of Verification (Production-Proven Quality)
 
-- **Multi-LLM consensus** - 3+ independent AI judges review PRD
+- **Multi-LLM consensus** - Multiple independent judges review PRD:
+  - **Claude Code Session** - Your authenticated session as primary judge (no API call)
+  - **Apple Intelligence** - On-device judge (macOS 26+, automatic, no API key)
+  - **OpenAI GPT-4** - Optional third judge (set OPENAI_API_KEY)
+  - **Gemini 2.5 Pro** - Optional fourth judge (set GEMINI_API_KEY)
+  - **OpenRouter/Bedrock** - Optional 5th-6th judges for maximum consensus
+- **Minimum setup** - 2 judges (Claude Code + Apple Intelligence) without any configuration
 - **Comprehensive validation** - Completeness, consistency, clarity, testability
 - **Gap detection** - Identifies missing requirements all judges notice
 - **Conflict resolution** - Finds contradictions between sections
@@ -322,10 +328,37 @@ Edit `skill-config.json` to customize:
 
 ## Environment Variables
 
-### Required (Choose One)
+### For Claude Code Users (You!)
+
+**🎉 No API keys required!** When this skill runs inside Claude Code:
+- ✅ **Your Claude session** acts as the primary verification judge
+- ✅ **Apple Intelligence** (macOS 26+) acts as second judge automatically
+- ✅ **Minimum 2 judges** for Chain of Verification without any configuration
+- ✅ **Zero external API calls** for Claude verification (you evaluate naturally)
+
+**Want stronger consensus?** Add optional judges below for 3-6 judge evaluation:
+
+### Optional Additional Judges
 
 ```bash
-# Anthropic Claude (Recommended)
+# OpenAI GPT-4 (Third judge - optional)
+export OPENAI_API_KEY="sk-..."
+
+# Google Gemini (Fourth judge - optional)
+export GEMINI_API_KEY="..."
+
+# OpenRouter (Fifth judge - optional, access to 100+ models)
+export OPENROUTER_API_KEY="..."
+
+# AWS Bedrock (Sixth judge - optional)
+export AWS_ACCESS_KEY_ID="..."
+export AWS_SECRET_ACCESS_KEY="..."
+```
+
+### For Standalone CLI Use (Outside Claude Code)
+
+```bash
+# Anthropic Claude (Required if not in Claude Code)
 export ANTHROPIC_API_KEY="sk-ant-..."
 
 # OR OpenAI GPT-4
