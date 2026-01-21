@@ -1,7 +1,6 @@
 {
   "version": "1.0.0",
   "clarification": {
-    "max_rounds": 5,
     "confidence_threshold": 0.90,
     "min_questions_per_round": 2,
     "max_questions_per_round": 5

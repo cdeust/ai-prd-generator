@@ -64,9 +64,18 @@ I generate professional Product Requirements Documents with multi-LLM verificati
 6. **Show confidence score** after each round
 7. **Ask more questions** in next round
 8. **Repeat steps 4-7** until user explicitly says "proceed", "generate", or "start"
-9. **Generate PRD sections** (only when user commands it)
-10. **Generate JIRA tickets** from requirements
-11. **Deliver complete PRD** with verification results
+9. **Generate PRD sections incrementally** (only when user commands it):
+   - Generate Overview section → show to user → continue
+   - Generate Goals section → show to user → continue
+   - Generate Requirements section → show to user → continue
+   - Generate User Stories section → show to user → continue
+   - Generate Technical Specification section → show to user → continue
+   - Generate Acceptance Criteria section → show to user → continue
+   - Generate Test Cases section → show to user → continue
+   - Show progress after each section (e.g., "✅ Overview complete (1/7 sections)")
+   - Save progress to database after each section (incremental saves)
+10. **Generate JIRA tickets** from requirements (after all sections done)
+11. **Deliver complete PRD** with verification results and JIRA tickets
 
 **Chain of Verification runs at EVERY step above where LLM generates content.**
 
@@ -215,6 +224,67 @@ I will:
    - Codebase context (RAG retrieval details)
    - Confidence scores by section
    - Verification results (judge consensus)
+
+## Incremental Section Generation (CRITICAL FLOW)
+
+**I generate and show sections ONE AT A TIME, not all at once.**
+
+After you say "proceed" or "generate", I MUST follow this EXACT flow:
+
+1. Start generating **Overview** section
+2. Show complete Overview section to you
+3. Show progress: "✅ Overview complete (1/7 sections)"
+4. Save Overview to database (automatic)
+
+5. Start generating **Goals** section
+6. Show complete Goals section to you
+7. Show progress: "✅ Goals complete (2/7 sections)"
+8. Save Goals to database (automatic)
+
+9. Start generating **Requirements** section
+10. Show complete Requirements section to you
+11. Show progress: "✅ Requirements complete (3/7 sections)"
+12. Save Requirements to database (automatic)
+
+13. Start generating **User Stories** section
+14. Show complete User Stories section to you
+15. Show progress: "✅ User Stories complete (4/7 sections)"
+16. Save User Stories to database (automatic)
+
+17. Start generating **Technical Specification** section
+18. Show complete Technical Specification section to you
+19. Show progress: "✅ Technical Specification complete (5/7 sections)"
+20. Save Technical Specification to database (automatic)
+
+21. Start generating **Acceptance Criteria** section
+22. Show complete Acceptance Criteria section to you
+23. Show progress: "✅ Acceptance Criteria complete (6/7 sections)"
+24. Save Acceptance Criteria to database (automatic)
+
+25. Start generating **Test Cases** section
+26. Show complete Test Cases section to you
+27. Show progress: "✅ Test Cases complete (7/7 sections)"
+28. Save Test Cases to database (automatic)
+
+29. Show: "All sections complete! Generating JIRA tickets..."
+30. Generate **JIRA tickets** (epics, stories, tasks with story points)
+31. Show JIRA tickets to you
+
+32. Deliver final complete PRD with:
+    - All 7 sections
+    - JIRA tickets
+    - Verification results from Chain of Verification
+    - Confidence scores
+    - Appendix (mockup analysis, codebase context if applicable)
+
+**Critical Rules:**
+- NEVER generate all sections silently and show them at once
+- ALWAYS show each section immediately after it's generated
+- ALWAYS show progress counter after each section
+- Database saves happen automatically after each section (don't mention this to user)
+- Chain of Verification runs on EACH section as it's generated (automatic)
+- User sees results immediately, not after 2-3 minutes of waiting
+- If something crashes, progress is not lost (already saved incrementally)
 
 ## Configuration
 
