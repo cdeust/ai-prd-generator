@@ -1,6 +1,6 @@
 import Foundation
 
-/// Port for storing and managing embeddings (Supabase)
+/// Port for storing and managing embeddings (PostgreSQL)
 /// Domain interface for embedding persistence
 public protocol EmbeddingStoragePort: Sendable {
     /// Store embeddings for code chunks

@@ -7,7 +7,7 @@ import Domain
 public final class DynamicVerificationAdapter: Sendable {
     private let historicalAnalyzer: HistoricalVerificationAnalyzer
     private let evidenceRepository: VerificationEvidenceRepositoryPort
-    private let analysisHelper: VerificationAnalysisCoordinator
+    private let analysisCoordinator: VerificationAnalysisCoordinator
 
     public init(
         historicalAnalyzer: HistoricalVerificationAnalyzer,
@@ -15,7 +15,7 @@ public final class DynamicVerificationAdapter: Sendable {
     ) {
         self.historicalAnalyzer = historicalAnalyzer
         self.evidenceRepository = evidenceRepository
-        self.analysisHelper = VerificationAnalysisCoordinator()
+        self.analysisCoordinator = VerificationAnalysisCoordinator()
     }
 
     /// Real-time threshold adaptation during PRD generation
@@ -31,7 +31,7 @@ public final class DynamicVerificationAdapter: Sendable {
         )
 
         // Analyze current verification outcome
-        let currentPerformance = analysisHelper.analyzeCurrentPerformance(verificationResult)
+        let currentPerformance = analysisCoordinator.analyzeCurrentPerformance(verificationResult)
 
         // Dynamic adjustment rules
         let adjustment: Double
@@ -129,21 +129,21 @@ public final class DynamicVerificationAdapter: Sendable {
         )
 
         // Analyze PRD context
-        let contextAnalysis = analysisHelper.analyzePRDContext(prdContext)
+        let contextAnalysis = analysisCoordinator.analyzePRDContext(prdContext)
 
         // Select questions matching current context
         var selectedQuestions: [VerificationQuestion] = []
 
         // 1. Add questions proven effective for this context type
         for question in optimalQuestions {
-            if analysisHelper.isRelevantForContext(question, contextAnalysis) {
+            if analysisCoordinator.isRelevantForContext(question, contextAnalysis) {
                 selectedQuestions.append(question)
             }
             if selectedQuestions.count >= 5 { break }
         }
 
         // 2. Add questions targeting known weak areas
-        if let weakAreas = analysisHelper.identifyWeakAreas(verificationHistory) {
+        if let weakAreas = analysisCoordinator.identifyWeakAreas(verificationHistory) {
             let targetedQuestions = optimalQuestions.filter { question in
                 weakAreas.contains { area in
                     question.question.lowercased().contains(area.lowercased())
@@ -178,7 +178,7 @@ public final class DynamicVerificationAdapter: Sendable {
         )
 
         // Analyze current trajectory
-        let trajectory = analysisHelper.analyzeRefinementTrajectory(
+        let trajectory = analysisCoordinator.analyzeRefinementTrajectory(
             current: verificationResult,
             history: refinementHistory
         )

@@ -2,7 +2,7 @@ import Foundation
 
 /// Port for PostgreSQL database operations
 /// Domain defines interface, Infrastructure implements with direct SQL
-/// Following same pattern as SupabaseDatabasePort but for local PostgreSQL
+/// Database port for local PostgreSQL (standalone skill)
 /// Reuses QueryFilter from domain (database-agnostic filter concept)
 public protocol PostgreSQLDatabasePort: Sendable {
     // MARK: - Connection Management

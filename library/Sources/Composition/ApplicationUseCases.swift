@@ -16,7 +16,7 @@ public struct ApplicationUseCases: Sendable {
     public let verifiedClarificationOrchestrator: VerifiedClarificationOrchestratorUseCase?
     public let analyzeRequest: AnalyzeRequestUseCase?
 
-    // Codebase operations (optional - requires Supabase configuration)
+    // Codebase operations (optional - requires PostgreSQL configuration)
     public let createCodebase: CreateCodebaseUseCase?
     public let indexCodebase: IndexCodebaseUseCase?
     public let listCodebases: ListCodebasesUseCase?

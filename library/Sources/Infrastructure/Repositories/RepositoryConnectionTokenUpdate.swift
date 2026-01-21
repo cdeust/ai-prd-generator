@@ -1,7 +1,7 @@
 import Foundation
 
 /// Encodable struct for token update operations
-/// Used by SupabaseRepositoryConnectionRepository for token updates
+/// Used for repository connection token updates
 struct RepositoryConnectionTokenUpdate: Encodable {
     let accessTokenEncrypted: String
     let refreshTokenEncrypted: String?

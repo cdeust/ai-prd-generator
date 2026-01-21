@@ -11,6 +11,7 @@ public final class ApplicationFactory: @unchecked Sendable {
     private let aiComponentsFactory: AIComponentsFactory
     private let prdUseCaseFactory: PRDUseCaseFactory
     private let clarificationFactory: ClarificationUseCaseFactory
+    private let useCaseBuilder: ApplicationUseCaseBuilder
     private var cachedDependencies: FactoryDependencies?
     private var cachedPromptService: PromptEngineeringService?
     private var repositoryConnection: RepositoryConnectionPort?
@@ -25,6 +26,12 @@ public final class ApplicationFactory: @unchecked Sendable {
             aiComponentsFactory: aiComponentsFactory
         )
         self.clarificationFactory = ClarificationUseCaseFactory(configuration: configuration)
+        self.useCaseBuilder = ApplicationUseCaseBuilder(
+            configuration: configuration,
+            prdUseCaseFactory: prdUseCaseFactory,
+            clarificationFactory: clarificationFactory,
+            repositoryFactory: repositoryFactory
+        )
     }
 
     /// Create fully-configured use cases
@@ -119,12 +126,24 @@ public final class ApplicationFactory: @unchecked Sendable {
     ) async throws -> ApplicationUseCases {
         let promptService = aiComponentsFactory.createPromptEngineeringService()
         self.cachedPromptService = promptService
-        let generatePRD = await createGeneratePRDUseCase(dependencies: dependencies, promptService: promptService)
-        let (listPRDs, getPRD) = createPRDQueryUseCases(dependencies: dependencies)
-        let sessionUseCases = createSessionUseCases(dependencies: dependencies, generatePRD: generatePRD)
-        let clarificationUseCases = await createClarificationUseCases(dependencies: dependencies, generatePRD: generatePRD)
-        let codebaseUseCases = try createCodebaseUseCases()
-        let integrationResult = try await createIntegrationUseCases(
+        let intelligenceTracker = getIntelligenceTracker()
+
+        let generatePRD = await useCaseBuilder.createGeneratePRDUseCase(
+            dependencies: dependencies,
+            promptService: promptService
+        )
+        let (listPRDs, getPRD) = useCaseBuilder.createPRDQueryUseCases(dependencies: dependencies)
+        let sessionUseCases = useCaseBuilder.createSessionUseCases(
+            dependencies: dependencies,
+            generatePRD: generatePRD
+        )
+        let clarificationUseCases = await useCaseBuilder.createClarificationUseCases(
+            dependencies: dependencies,
+            generatePRD: generatePRD,
+            intelligenceTracker: intelligenceTracker
+        )
+        let codebaseUseCases = try useCaseBuilder.createCodebaseUseCases()
+        let integrationResult = try await useCaseBuilder.createIntegrationUseCases(
             codebaseRepository: codebaseUseCases.repository,
             createCodebase: codebaseUseCases.create,
             indexCodebase: codebaseUseCases.index
@@ -132,9 +151,34 @@ public final class ApplicationFactory: @unchecked Sendable {
 
         self.repositoryConnection = integrationResult.connectionRepository
         self.codebaseRepository = codebaseUseCases.repository
-        let analyzeRequest = createAnalyzeRequestUseCase(dependencies: dependencies)
+        let analyzeRequest = useCaseBuilder.createAnalyzeRequestUseCase(
+            dependencies: dependencies,
+            intelligenceTracker: intelligenceTracker
+        )
 
-        return ApplicationUseCases(
+        return assembleUseCases(
+            generatePRD: generatePRD,
+            listPRDs: listPRDs,
+            getPRD: getPRD,
+            sessionUseCases: sessionUseCases,
+            clarificationUseCases: clarificationUseCases,
+            analyzeRequest: analyzeRequest,
+            codebaseUseCases: codebaseUseCases,
+            integrationResult: integrationResult
+        )
+    }
+
+    private func assembleUseCases(
+        generatePRD: GeneratePRDUseCase,
+        listPRDs: ListPRDsUseCase,
+        getPRD: GetPRDUseCase,
+        sessionUseCases: (create: CreateSessionUseCase, continue: ContinueSessionUseCase, list: ListSessionsUseCase, get: GetSessionUseCase, delete: DeleteSessionUseCase),
+        clarificationUseCases: (base: ClarificationOrchestratorUseCase?, verified: VerifiedClarificationOrchestratorUseCase?),
+        analyzeRequest: AnalyzeRequestUseCase,
+        codebaseUseCases: (create: CreateCodebaseUseCase?, index: IndexCodebaseUseCase?, list: ListCodebasesUseCase?, search: SearchCodebaseUseCase?, repository: CodebaseRepositoryPort?),
+        integrationResult: (connect: ConnectRepositoryProviderUseCase?, list: ListUserRepositoriesUseCase?, indexRemote: IndexRemoteRepositoryUseCase?, disconnect: DisconnectProviderUseCase?, listConnections: ListConnectionsUseCase?, connectionRepository: RepositoryConnectionPort?)
+    ) -> ApplicationUseCases {
+        ApplicationUseCases(
             generatePRD: generatePRD,
             listPRDs: listPRDs,
             getPRD: getPRD,
@@ -213,99 +257,5 @@ public final class ApplicationFactory: @unchecked Sendable {
             print("⚠️ [ApplicationFactory] VerificationService creation failed: \(error)")
             return nil
         }
-    }
-    private func createClarificationUseCases(
-        dependencies: FactoryDependencies,
-        generatePRD: GeneratePRDUseCase
-    ) async -> (base: ClarificationOrchestratorUseCase?, verified: VerifiedClarificationOrchestratorUseCase?) {
-        let intelligenceTracker = getIntelligenceTracker()
-        return await clarificationFactory.createClarificationUseCases(
-            dependencies: dependencies,
-            generatePRD: generatePRD,
-            intelligenceTracker: intelligenceTracker
-        )
-    }
-    private func createAnalyzeRequestUseCase(
-        dependencies: FactoryDependencies
-    ) -> AnalyzeRequestUseCase {
-        let intelligenceTracker = getIntelligenceTracker()
-        let contextBuilder = prdUseCaseFactory.createEnrichedContextBuilder(
-            dependencies: dependencies,
-            intelligenceTracker: intelligenceTracker
-        )
-        let requirementAnalyzer = RequirementAnalyzerService(
-            aiProvider: dependencies.aiProvider,
-            intelligenceTracker: intelligenceTracker
-        )
-
-        return AnalyzeRequestUseCase(
-            contextBuilder: contextBuilder,
-            requirementAnalyzer: requirementAnalyzer,
-            intelligenceTracker: intelligenceTracker
-        )
-    }
-    private func createGeneratePRDUseCase(
-        dependencies: FactoryDependencies,
-        promptService: PromptEngineeringService
-    ) async -> GeneratePRDUseCase {
-        await prdUseCaseFactory.createGeneratePRDUseCase(
-            dependencies: dependencies,
-            promptService: promptService
-        )
-    }
-    private func createIntegrationUseCases(
-        codebaseRepository: CodebaseRepositoryPort?,
-        createCodebase: CreateCodebaseUseCase?,
-        indexCodebase: IndexCodebaseUseCase?
-    ) async throws -> (
-        connect: ConnectRepositoryProviderUseCase?,
-        list: ListUserRepositoriesUseCase?,
-        indexRemote: IndexRemoteRepositoryUseCase?,
-        disconnect: DisconnectProviderUseCase?,
-        listConnections: ListConnectionsUseCase?,
-        connectionRepository: RepositoryConnectionPort?
-    ) {
-        try await IntegrationFactory(
-            configuration: configuration,
-            repositoryFactory: repositoryFactory
-        ).createIntegrationUseCases(
-            codebaseRepository: codebaseRepository,
-            createCodebase: createCodebase,
-            indexCodebase: indexCodebase
-        )
-    }
-    private func createPRDQueryUseCases(
-        dependencies: FactoryDependencies
-    ) -> (list: ListPRDsUseCase, get: GetPRDUseCase) {
-        let list = ListPRDsUseCase(repository: dependencies.prdRepository)
-        let get = GetPRDUseCase(repository: dependencies.prdRepository)
-        return (list, get)
-    }
-    private func createSessionUseCases(
-        dependencies: FactoryDependencies,
-        generatePRD: GeneratePRDUseCase
-    ) -> (
-        create: CreateSessionUseCase,
-        continue: ContinueSessionUseCase,
-        list: ListSessionsUseCase,
-        get: GetSessionUseCase,
-        delete: DeleteSessionUseCase
-    ) {
-        let create = CreateSessionUseCase(repository: dependencies.sessionRepository)
-        let continueUseCase = ContinueSessionUseCase(sessionRepository: dependencies.sessionRepository, generatePRD: generatePRD)
-        let list = ListSessionsUseCase(repository: dependencies.sessionRepository)
-        let get = GetSessionUseCase(repository: dependencies.sessionRepository)
-        let delete = DeleteSessionUseCase(repository: dependencies.sessionRepository)
-        return (create, continueUseCase, list, get, delete)
-    }
-    private func createCodebaseUseCases() throws -> (
-        create: CreateCodebaseUseCase?,
-        index: IndexCodebaseUseCase?,
-        list: ListCodebasesUseCase?,
-        search: SearchCodebaseUseCase?,
-        repository: CodebaseRepositoryPort?
-    ) {
-        let factory = CodebaseUseCaseFactory(configuration: configuration)
-        return try factory.createUseCases()
     }
 }

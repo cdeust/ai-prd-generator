@@ -1,7 +1,7 @@
 import Foundation
 
-/// Encodable row for Supabase insert operations
-/// Used by SupabaseRepositoryConnectionRepository for insert operations
+/// Encodable row for database insert operations
+/// Used by repository connection repository for insert operations
 struct RepositoryConnectionRow: Encodable {
     let id: String
     let userId: String

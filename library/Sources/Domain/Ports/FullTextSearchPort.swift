@@ -1,7 +1,7 @@
 import Foundation
 
 /// Port for database-level full-text search (PostgreSQL, BM25, etc.)
-/// Domain defines the interface, Infrastructure implements with Supabase/PostgreSQL
+/// Domain defines the interface, Infrastructure implements with PostgreSQL
 public protocol FullTextSearchPort: Sendable {
     /// Search for code chunks using full-text search with BM25 ranking
     /// - Parameters:

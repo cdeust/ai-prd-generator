@@ -1,7 +1,7 @@
 import Foundation
 
-/// Port for vector similarity search (Supabase pgvector)
-/// Domain defines the interface, Infrastructure implements with Supabase
+/// Port for vector similarity search (PostgreSQL pgvector)
+/// Domain defines the interface, Infrastructure implements with PostgreSQL
 public protocol VectorSearchPort: Sendable {
     /// Search for similar code chunks using vector similarity
     /// - Parameters:

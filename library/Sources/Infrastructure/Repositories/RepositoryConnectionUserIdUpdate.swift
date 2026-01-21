@@ -1,7 +1,7 @@
 import Foundation
 
 /// Encodable struct for user ID update operations
-/// Used by SupabaseRepositoryConnectionRepository for updating user ID
+/// Used for repository connection user ID updates
 struct RepositoryConnectionUserIdUpdate: Encodable {
     let userId: String
 

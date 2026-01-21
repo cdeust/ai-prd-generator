@@ -13,78 +13,33 @@ public final class RepositoryFactory {
     }
 
     public func createPRDRepository() async throws -> PRDRepositoryPort {
-        switch configuration.storageType {
-        case .memory, .filesystem, .postgres:
-            // For local PostgreSQL, use in-memory for now (PRD not critical for MCP skill)
-            return InMemoryPRDRepository()
-        case .supabase:
-            let databaseClient = try createSupabaseDatabaseClient()
-            return SupabasePRDRepository(databaseClient: databaseClient)
-        }
+        // Standalone skill: Always use in-memory for PRD documents
+        // (PRDs are generated on-demand, no need for persistence)
+        return InMemoryPRDRepository()
     }
 
     public func createSessionRepository() async throws -> SessionRepositoryPort {
-        switch configuration.storageType {
-        case .memory, .filesystem, .postgres:
-            // For local PostgreSQL, use in-memory for now (sessions not critical for MCP skill)
-            return InMemorySessionRepository()
-        case .supabase:
-            let databaseClient = try createSupabaseDatabaseClient()
-            return SupabaseSessionRepository(client: databaseClient)
-        }
+        // Standalone skill: Always use in-memory for sessions
+        // (Sessions are transient, no need for persistence)
+        return InMemorySessionRepository()
     }
 
     public func createTemplateRepository() async throws -> PRDTemplateRepositoryPort {
-        switch configuration.storageType {
-        case .memory, .filesystem, .postgres:
-            // For local PostgreSQL, use in-memory for now (templates not critical for MCP skill)
-            return InMemoryPRDTemplateRepository()
-        case .supabase:
-            let supabaseClient = try createSupabaseClient()
-            return SupabasePRDTemplateRepository(client: supabaseClient)
-        }
+        // Standalone skill: Always use in-memory for templates
+        // (Templates are loaded from code, no need for database)
+        return InMemoryPRDTemplateRepository()
     }
 
     public func createMockupRepository() async throws -> MockupRepositoryPort {
-        switch configuration.storageType {
-        case .memory, .filesystem, .postgres:
-            // For local PostgreSQL, use in-memory for now (mockups not critical for MCP skill)
-            return InMemoryMockupRepository()
-        case .supabase:
-            let databaseClient = try createSupabaseDatabaseClient()
-            return SupabaseMockupRepository(databaseClient: databaseClient)
-        }
+        // Standalone skill: Always use in-memory for mockups
+        // (Mockups are analyzed and discarded, no need for persistence)
+        return InMemoryMockupRepository()
     }
 
     public func createVerificationEvidenceRepository() async throws -> VerificationEvidenceRepositoryPort {
-        switch configuration.storageType {
-        case .memory, .filesystem, .postgres:
-            // For local PostgreSQL and non-database storage, use in-memory
-            return InMemoryVerificationEvidenceRepository()
-        case .supabase:
-            let databaseClient = try createSupabaseDatabaseClient()
-            return SupabaseVerificationEvidenceRepository(databaseClient: databaseClient)
-        }
-    }
-
-    private func createSupabaseClient() throws -> SupabaseClient {
-        guard let urlString = configuration.supabaseURL,
-              let url = URL(string: urlString),
-              let key = configuration.supabaseKey else {
-            throw ConfigurationError.missingSupabaseCredentials
-        }
-        return SupabaseClient(projectURL: url, apiKey: key)
-    }
-
-    private func createSupabaseDatabaseClient() throws -> SupabaseDatabasePort {
-        guard let urlString = configuration.supabaseURL,
-              let url = URL(string: urlString),
-              let key = configuration.supabaseKey else {
-            throw ConfigurationError.missingSupabaseCredentials
-        }
-
-        let supabaseClient = SupabaseClient(projectURL: url, apiKey: key)
-        return SupabaseDatabaseClient(supabaseClient: supabaseClient)
+        // Standalone skill: Always use in-memory for verification evidence
+        // (Verification results are included in PRD output, no need for persistence)
+        return InMemoryVerificationEvidenceRepository()
     }
 
     public func seedDefaultTemplate(

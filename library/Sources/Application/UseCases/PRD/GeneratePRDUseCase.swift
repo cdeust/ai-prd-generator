@@ -79,7 +79,8 @@ public struct GeneratePRDUseCase: Sendable {
             clarificationService: sectionClarificationService,
             interactionHandler: interactionHandler,
             thinkingOrchestrator: thinkingOrchestrator,
-            intelligenceTracker: intelligenceTracker
+            intelligenceTracker: intelligenceTracker,
+            verificationService: verificationService
         )
     }
 

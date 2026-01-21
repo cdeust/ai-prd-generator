@@ -95,12 +95,4 @@ public actor GitHubAPIClient: GitHubAPIPort {
 // MARK: - GitHub Data Models
 
 // GitHubRepository and GitHubFile moved to Domain layer
-
-/// GitHub API response for directory contents (internal implementation detail)
-struct GitHubContent: Codable, Sendable {
-    let name: String
-    let path: String
-    let type: String  // "file" or "dir"
-    let size: Int
-    let download_url: String?
-}
+// GitHubContent is now defined in GitHubContent.swift

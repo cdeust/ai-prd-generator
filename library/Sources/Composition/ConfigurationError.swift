@@ -1,8 +1,7 @@
 import Foundation
 
-/// Configuration errors
+/// Configuration errors for standalone skill
 public enum ConfigurationError: Error, Sendable {
     case missingAPIKey(String)
-    case missingSupabaseCredentials
     case missingDatabaseURL
 }

@@ -1,15 +1,16 @@
 import Foundation
 import Domain
+import InfrastructureCore
 
-/// PostgreSQL full-text search implementation using Supabase
+/// PostgreSQL full-text search implementation for standalone skill
 /// Implements database-level BM25 ranking for scalability
 /// Following Interface Segregation Principle: depends only on database operations
 public struct PostgreSQLFullTextSearch: FullTextSearchPort, Sendable {
-    private let databaseClient: SupabaseDatabasePort
+    private let databaseClient: PostgreSQLDatabasePort
     private let chunkTableName = "code_chunks"
     private let fileTableName = "code_files"
 
-    public init(databaseClient: SupabaseDatabasePort) {
+    public init(databaseClient: PostgreSQLDatabasePort) {
         self.databaseClient = databaseClient
     }
 

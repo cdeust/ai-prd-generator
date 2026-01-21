@@ -47,9 +47,51 @@ struct VerificationFactory {
     private func createJudgeProviders() async throws -> [AIProviderPort] {
         var judges: [AIProviderPort] = []
         let providerFactory = AIProviderFactory()
+        let isClaudeCode = ProcessInfo.processInfo.environment["CLAUDECODE"] == "1"
 
+        printClaudeCodeDetection(isClaudeCode)
+        try await addClaudeJudge(to: &judges, factory: providerFactory, isClaudeCode: isClaudeCode)
+        try await addAppleIntelligenceJudge(to: &judges, factory: providerFactory)
+        try await addOpenAIJudge(to: &judges, factory: providerFactory)
+        try await addGeminiJudge(to: &judges, factory: providerFactory)
+        try await addOpenRouterJudge(to: &judges, factory: providerFactory)
+        try await addBedrockJudge(to: &judges, factory: providerFactory)
+        try validateAndLogJudges(judges)
+
+        return judges
+    }
+
+    private func printClaudeCodeDetection(_ isClaudeCode: Bool) {
         print("🔍 [VerificationFactory] Creating judge providers...")
+        if isClaudeCode {
+            print("📱 [VerificationFactory] Running inside Claude Code (authenticated session)")
+            print("   Claude evaluates naturally in conversation - no API call needed")
+            print("   Using Apple Intelligence + OpenAI/Gemini for programmatic consensus")
+        }
+    }
 
+    private func addClaudeJudge(
+        to judges: inout [AIProviderPort],
+        factory: AIProviderFactory,
+        isClaudeCode: Bool
+    ) async throws {
+        guard !isClaudeCode, let anthropicKey = configuration.anthropicKey, !anthropicKey.isEmpty else { return }
+
+        let anthropicConfig = AIProviderConfiguration(
+            type: .anthropic,
+            apiKey: anthropicKey,
+            model: "claude-sonnet-4-5"
+        )
+        if let provider = try? await factory.createProvider(from: anthropicConfig) {
+            judges.append(provider)
+            print("✅ [VerificationFactory] Claude judge added (claude-sonnet-4-5)")
+        }
+    }
+
+    private func addAppleIntelligenceJudge(
+        to judges: inout [AIProviderPort],
+        factory: AIProviderFactory
+    ) async throws {
         #if os(iOS) || os(macOS)
         if #available(iOS 26.0, macOS 26.0, *) {
             let appleConfig = AIProviderConfiguration(
@@ -57,97 +99,106 @@ struct VerificationFactory {
                 apiKey: nil,
                 model: nil
             )
-            if let appleProvider = try? await providerFactory.createProvider(from: appleConfig) {
-                judges.append(appleProvider)
-                print("✅ [VerificationFactory] Apple Intelligence judge added")
+            if let provider = try? await factory.createProvider(from: appleConfig) {
+                judges.append(provider)
+                print("✅ [VerificationFactory] Apple Intelligence judge added (on-device)")
+            } else {
+                print("⚠️ [VerificationFactory] Apple Intelligence provider creation failed")
             }
         } else {
-            print("⚠️ [VerificationFactory] Apple Intelligence not available (requires iOS 26+/macOS 26+)")
+            print("⚠️ [VerificationFactory] Apple Intelligence not available (requires macOS 26+ Tahoe)")
         }
         #endif
+    }
 
-        if let openAIKey = configuration.openAIKey, !openAIKey.isEmpty {
-            let openAIConfig = AIProviderConfiguration(
-                type: .openAI,
-                apiKey: openAIKey,
-                model: "gpt-4o"
-            )
-            if let openAIProvider = try? await providerFactory.createProvider(from: openAIConfig) {
-                judges.append(openAIProvider)
-                print("✅ [VerificationFactory] OpenAI judge added (gpt-4o)")
-            }
-        } else {
+    private func addOpenAIJudge(
+        to judges: inout [AIProviderPort],
+        factory: AIProviderFactory
+    ) async throws {
+        guard let openAIKey = configuration.openAIKey, !openAIKey.isEmpty else {
             print("⚠️ [VerificationFactory] No OpenAI API key configured")
+            return
         }
 
-        if let anthropicKey = configuration.anthropicKey, !anthropicKey.isEmpty {
-            let anthropicConfig = AIProviderConfiguration(
-                type: .anthropic,
-                apiKey: anthropicKey,
-                model: "claude-sonnet-4-5"
-            )
-            if let anthropicProvider = try? await providerFactory.createProvider(from: anthropicConfig) {
-                judges.append(anthropicProvider)
-                print("✅ [VerificationFactory] Anthropic judge added (claude-sonnet-4-5)")
-            }
-        } else {
-            print("⚠️ [VerificationFactory] No Anthropic API key configured")
+        let config = AIProviderConfiguration(type: .openAI, apiKey: openAIKey, model: "gpt-4o")
+        if let provider = try? await factory.createProvider(from: config) {
+            judges.append(provider)
+            print("✅ [VerificationFactory] OpenAI judge added (gpt-4o)")
         }
+    }
 
-        if let geminiKey = configuration.geminiKey, !geminiKey.isEmpty {
-            let geminiConfig = AIProviderConfiguration(
-                type: .gemini,
-                apiKey: geminiKey,
-                model: "gemini-2.5-pro"
-            )
-            if let geminiProvider = try? await providerFactory.createProvider(from: geminiConfig) {
-                judges.append(geminiProvider)
-                print("✅ [VerificationFactory] Gemini judge added (gemini-2.5-pro)")
-            }
-        } else {
+    private func addGeminiJudge(
+        to judges: inout [AIProviderPort],
+        factory: AIProviderFactory
+    ) async throws {
+        guard let geminiKey = configuration.geminiKey, !geminiKey.isEmpty else {
             print("⚠️ [VerificationFactory] No Gemini API key configured")
+            return
         }
 
-        if let openRouterKey = configuration.openRouterKey, !openRouterKey.isEmpty {
-            let openRouterConfig = AIProviderConfiguration(
-                type: .openRouter,
-                apiKey: openRouterKey,
-                model: "anthropic/claude-sonnet-4-5"
-            )
-            if let openRouterProvider = try? await providerFactory.createProvider(from: openRouterConfig) {
-                judges.append(openRouterProvider)
-                print("✅ [VerificationFactory] OpenRouter judge added (anthropic/claude-sonnet-4-5)")
-            }
-        } else {
+        let config = AIProviderConfiguration(type: .gemini, apiKey: geminiKey, model: "gemini-2.5-pro")
+        if let provider = try? await factory.createProvider(from: config) {
+            judges.append(provider)
+            print("✅ [VerificationFactory] Gemini judge added (gemini-2.5-pro)")
+        }
+    }
+
+    private func addOpenRouterJudge(
+        to judges: inout [AIProviderPort],
+        factory: AIProviderFactory
+    ) async throws {
+        guard let openRouterKey = configuration.openRouterKey, !openRouterKey.isEmpty else {
             print("⚠️ [VerificationFactory] No OpenRouter API key configured")
+            return
         }
 
-        if let bedrockAccessKeyId = configuration.bedrockAccessKeyId,
-           let bedrockSecretAccessKey = configuration.bedrockSecretAccessKey,
-           !bedrockAccessKeyId.isEmpty,
-           !bedrockSecretAccessKey.isEmpty {
-            let bedrockConfig = AIProviderConfiguration(
-                type: .bedrock,
-                apiKey: nil,
-                model: "anthropic.claude-sonnet-4-5-20250929",
-                region: configuration.bedrockRegion ?? "us-east-1",
-                accessKeyId: bedrockAccessKeyId,
-                secretAccessKey: bedrockSecretAccessKey
-            )
-            if let bedrockProvider = try? await providerFactory.createProvider(from: bedrockConfig) {
-                judges.append(bedrockProvider)
-                print("✅ [VerificationFactory] AWS Bedrock judge added (anthropic.claude-sonnet-4-5-20250929)")
-            }
-        } else {
+        let config = AIProviderConfiguration(type: .openRouter, apiKey: openRouterKey, model: "anthropic/claude-sonnet-4-5")
+        if let provider = try? await factory.createProvider(from: config) {
+            judges.append(provider)
+            print("✅ [VerificationFactory] OpenRouter judge added (anthropic/claude-sonnet-4-5)")
+        }
+    }
+
+    private func addBedrockJudge(
+        to judges: inout [AIProviderPort],
+        factory: AIProviderFactory
+    ) async throws {
+        guard let accessKeyId = configuration.bedrockAccessKeyId,
+              let secretAccessKey = configuration.bedrockSecretAccessKey,
+              !accessKeyId.isEmpty, !secretAccessKey.isEmpty else {
             print("⚠️ [VerificationFactory] No AWS Bedrock credentials configured")
+            return
         }
 
+        let config = AIProviderConfiguration(
+            type: .bedrock,
+            apiKey: nil,
+            model: "anthropic.claude-sonnet-4-5-20250929",
+            region: configuration.bedrockRegion ?? "us-east-1",
+            accessKeyId: accessKeyId,
+            secretAccessKey: secretAccessKey
+        )
+        if let provider = try? await factory.createProvider(from: config) {
+            judges.append(provider)
+            print("✅ [VerificationFactory] AWS Bedrock judge added (anthropic.claude-sonnet-4-5-20250929)")
+        }
+    }
+
+    private func validateAndLogJudges(_ judges: [AIProviderPort]) throws {
         guard !judges.isEmpty else {
-            print("❌ [VerificationFactory] NO judges available - need at least one API key")
+            print("❌ [VerificationFactory] NO judges available")
+            print("   Set at least one of: ANTHROPIC_API_KEY, OPENAI_API_KEY, GEMINI_API_KEY")
+            print("   Or use macOS 26+ for Apple Intelligence")
             throw AIProviderError.authenticationFailed
         }
 
         print("✅ [VerificationFactory] Created \(judges.count) judge(s) for verification")
-        return judges
+        if judges.count >= 2 {
+            print("   Multi-LLM consensus enabled with \(judges.count) diverse models")
+        } else {
+            print("   ⚠️  Only 1 judge available - consensus works best with 2+ judges")
+        }
     }
 }
+
+

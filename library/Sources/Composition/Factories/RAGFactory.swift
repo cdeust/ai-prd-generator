@@ -13,10 +13,8 @@ struct RAGFactory: Sendable {
     }
 
     func createCodebaseRepository() throws -> CodebaseRepositoryPort? {
+        // Standalone skill: Only support PostgreSQL (Docker/local) for RAG
         switch configuration.storageType {
-        case .supabase:
-            let databaseClient = try createSupabaseDatabaseClient()
-            return SupabaseCodebaseRepository(databaseClient: databaseClient)
         case .postgres:
             let databaseClient = try createPostgreSQLDatabaseClient()
             return PostgreSQLCodebaseRepository(databaseClient: databaseClient)
@@ -37,14 +35,11 @@ struct RAGFactory: Sendable {
     }
 
     func createFullTextSearch() throws -> FullTextSearchPort? {
+        // Standalone skill: Use PostgreSQL for full-text search (BM25)
         switch configuration.storageType {
-        case .supabase:
-            let databaseClient = try createSupabaseDatabaseClient()
-            return PostgreSQLFullTextSearch(databaseClient: databaseClient)
         case .postgres:
-            // TODO: Implement PostgreSQLFullTextSearch for local PostgreSQL
-            // For now, return nil (hybrid search will use vector search only)
-            return nil
+            let databaseClient = try createPostgreSQLDatabaseClient()
+            return PostgreSQLFullTextSearch(databaseClient: databaseClient)
         case .memory, .filesystem:
             return nil
         }
@@ -62,19 +57,6 @@ struct RAGFactory: Sendable {
             embeddingGenerator: embeddingGenerator,
             fullTextSearch: fullTextSearch
         )
-    }
-
-    private func createSupabaseDatabaseClient() throws -> SupabaseDatabasePort {
-        guard let urlString = configuration.supabaseURL,
-              let url = URL(string: urlString),
-              let key = configuration.supabaseKey else {
-            throw ConfigurationError.missingSupabaseCredentials
-        }
-
-        // Use long-running client for database operations (indexing can take 30+ minutes)
-        let httpClient = HTTPClient.longRunning()
-        let supabaseClient = SupabaseClient(projectURL: url, apiKey: key, httpClient: httpClient)
-        return SupabaseDatabaseClient(supabaseClient: supabaseClient)
     }
 
     private func createPostgreSQLDatabaseClient() throws -> PostgreSQLDatabasePort {

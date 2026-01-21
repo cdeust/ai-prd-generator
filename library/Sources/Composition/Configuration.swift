@@ -9,8 +9,6 @@ public struct Configuration: Sendable {
     public let aiModel: String?
     public let storageType: StorageType
     public let storagePath: URL
-    public let supabaseURL: String?
-    public let supabaseKey: String?
     public let databaseURL: String?
 
     public let openAIKey: String?
@@ -27,8 +25,6 @@ public struct Configuration: Sendable {
         aiModel: String?,
         storageType: StorageType,
         storagePath: URL,
-        supabaseURL: String?,
-        supabaseKey: String?,
         databaseURL: String? = nil,
         openAIKey: String? = nil,
         anthropicKey: String? = nil,
@@ -43,8 +39,6 @@ public struct Configuration: Sendable {
         self.aiModel = aiModel
         self.storageType = storageType
         self.storagePath = storagePath
-        self.supabaseURL = supabaseURL
-        self.supabaseKey = supabaseKey
         self.databaseURL = databaseURL
         self.openAIKey = openAIKey
         self.anthropicKey = anthropicKey
@@ -62,9 +56,7 @@ public struct Configuration: Sendable {
         aiModel: nil,
         storageType: .memory,
         storagePath: URL(fileURLWithPath: NSHomeDirectory())
-            .appendingPathComponent(".ai-prd"),
-        supabaseURL: nil,
-        supabaseKey: nil
+            .appendingPathComponent(".ai-prd")
     )
 
     /// Load configuration from environment variables
@@ -80,8 +72,6 @@ public struct Configuration: Sendable {
             aiModel: ProcessInfo.processInfo.environment["AI_MODEL"],
             storageType: storage.type,
             storagePath: storage.path,
-            supabaseURL: storage.supabaseURL,
-            supabaseKey: storage.supabaseKey,
             databaseURL: storage.databaseURL,
             openAIKey: keys.openAI,
             anthropicKey: keys.anthropic,
@@ -96,8 +86,6 @@ public struct Configuration: Sendable {
     private struct StorageConfiguration {
         let type: StorageType
         let path: URL
-        let supabaseURL: String?
-        let supabaseKey: String?
         let databaseURL: String?
     }
 
@@ -113,20 +101,16 @@ public struct Configuration: Sendable {
     }
 
     private static func parseStorageConfiguration() -> StorageConfiguration {
-        let supabaseURL = ProcessInfo.processInfo.environment["SUPABASE_URL"]
-        let supabaseKey = ProcessInfo.processInfo.environment["SUPABASE_SERVICE_ROLE_KEY"]
-            ?? ProcessInfo.processInfo.environment["SUPABASE_KEY"]
         let databaseURL = ProcessInfo.processInfo.environment["DATABASE_URL"]
 
         let storageType: StorageType
         if let explicitType = ProcessInfo.processInfo.environment["STORAGE_TYPE"] {
             storageType = StorageType(rawValue: explicitType) ?? .memory
         } else if databaseURL != nil {
-            // Auto-detect PostgreSQL (local database takes precedence)
+            // Auto-detect PostgreSQL (local Docker or native PostgreSQL)
             storageType = .postgres
-        } else if supabaseURL != nil && supabaseKey != nil {
-            storageType = .supabase
         } else {
+            // Default to in-memory for standalone skill
             storageType = .memory
         }
 
@@ -137,8 +121,6 @@ public struct Configuration: Sendable {
         return StorageConfiguration(
             type: storageType,
             path: storagePath,
-            supabaseURL: supabaseURL,
-            supabaseKey: supabaseKey,
             databaseURL: databaseURL
         )
     }

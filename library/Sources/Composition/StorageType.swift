@@ -1,9 +1,8 @@
 import Foundation
 
-/// Storage types
+/// Storage types for standalone skill (no cloud dependencies)
 public enum StorageType: String, Sendable {
-    case memory
-    case filesystem
-    case supabase
-    case postgres
+    case memory      // In-memory only (no persistence)
+    case filesystem  // Local file storage
+    case postgres    // Local PostgreSQL (Docker or native)
 }

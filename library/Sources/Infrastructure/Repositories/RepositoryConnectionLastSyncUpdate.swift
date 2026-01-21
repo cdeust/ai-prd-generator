@@ -1,7 +1,7 @@
 import Foundation
 
 /// Encodable struct for last sync update operations
-/// Used by SupabaseRepositoryConnectionRepository for sync timestamp updates
+/// Used for repository connection sync timestamp updates
 struct RepositoryConnectionLastSyncUpdate: Encodable {
     let lastSyncedAt: Date
 
