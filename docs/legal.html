@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legal & Integrity | AI-PRD Generator</title>
+    <meta name="description" content="Intellectual property ownership, timestamp proof, and development transparency.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #fafafa;
+            --bg-secondary: #ffffff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #666666;
+            --border: #e0e0e0;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --code-bg: #f5f5f5;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 24px 0;
+        }
+
+        header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        header nav a {
+            margin-left: 32px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        header nav a:hover {
+            color: var(--text-primary);
+        }
+
+        main {
+            padding: 80px 0;
+        }
+
+        h2 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            letter-spacing: -0.01em;
+        }
+
+        h3 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-top: 48px;
+            margin-bottom: 16px;
+        }
+
+        h4 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-top: 32px;
+            margin-bottom: 12px;
+        }
+
+        p {
+            color: var(--text-secondary);
+            font-size: 16px;
+            line-height: 1.8;
+            margin-bottom: 16px;
+        }
+
+        .intro {
+            font-size: 18px;
+            color: var(--text-primary);
+            margin-bottom: 48px;
+            max-width: 800px;
+        }
+
+        .proof-box {
+            margin: 32px 0;
+            padding: 32px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .proof-box h4 {
+            margin-top: 0;
+        }
+
+        .proof-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .proof-item:last-child {
+            border-bottom: none;
+        }
+
+        .proof-label {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .proof-value {
+            color: var(--text-secondary);
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            word-break: break-all;
+        }
+
+        .timeline {
+            margin: 32px 0;
+            padding: 32px;
+            background: var(--bg-secondary);
+            border-left: 3px solid var(--accent);
+        }
+
+        .timeline-item {
+            margin-bottom: 24px;
+            padding-left: 24px;
+            position: relative;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -15px;
+            top: 8px;
+            width: 10px;
+            height: 10px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .timeline-date {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 4px;
+        }
+
+        .timeline-content {
+            color: var(--text-secondary);
+            font-size: 15px;
+        }
+
+        code {
+            background: var(--code-bg);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .verification-steps {
+            margin: 32px 0;
+            padding: 32px;
+            background: var(--code-bg);
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .verification-steps ol {
+            margin-left: 24px;
+        }
+
+        .verification-steps li {
+            margin-bottom: 8px;
+        }
+
+        ul {
+            margin-left: 24px;
+            color: var(--text-secondary);
+        }
+
+        ul li {
+            margin-bottom: 8px;
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        footer {
+            padding: 48px 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            h2 {
+                font-size: 28px;
+            }
+
+            .proof-item {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>AI-PRD Generator</h1>
+            <nav>
+                <a href="index.html">Home</a>
+                <a href="legal.html">Legal & Integrity</a>
+                <a href="https://github.com/cdeust/ai-prd" target="_blank">GitHub</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <h2>Legal & Integrity</h2>
+            <p class="intro">
+                Complete transparency on intellectual property ownership, development timeline, and cryptographic proof of origin.
+                This project was developed independently as freelance work, with full traceability via blockchain timestamp.
+            </p>
+
+            <h3>Intellectual Property Ownership</h3>
+            <p>
+                The AI-PRD Generator project is the sole property of <strong>Clément Deust</strong>, developed as an independent freelance initiative.
+                Development was conducted exclusively outside of any employment obligations, using personal equipment and resources.
+            </p>
+
+            <h4>Legal Context</h4>
+            <ul>
+                <li>Freelance activity established and disclosed prior to current employment</li>
+                <li>Development conducted entirely outside working hours (48% of commits between 18h-06h, including 13 commits between 00h-06h)</li>
+                <li>No use of proprietary code, data, or infrastructure from any employer</li>
+                <li>Complete commit history with timestamp analysis available for verification</li>
+            </ul>
+
+            <h3>Development Timeline</h3>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-date">September 2025</div>
+                    <div class="timeline-content">Initial proof-of-concept (<a href="https://github.com/cdeust/ai-prd-builder" target="_blank">ai-prd-builder</a>). First commit: September 11, 2025, 23:16 UTC.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">October 2025</div>
+                    <div class="timeline-content">Structured development begins (<a href="https://github.com/cdeust/ai-prd" target="_blank">ai-prd</a>). Clean architecture implementation, SOLID principles, Zero Tolerance rules. First commit: October 5, 2025, 17:36 CET.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">October - December 2025</div>
+                    <div class="timeline-content">Core feature development: RAG engine (hybrid vector/text search), Vision engine (mockup interpretation), Chain of Verification (multi-LLM validation).</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">January 2026</div>
+                    <div class="timeline-content">Packaging as Anthropic Skill (<a href="https://github.com/cdeust/ai-prd-generator" target="_blank">ai-prd-generator</a>). Internal testing with positive feedback. Landing page and pilot program launch.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">January 28, 2026</div>
+                    <div class="timeline-content">Cryptographic timestamp proof anchored on Bitcoin blockchain (Block 934075). Archive SHA-256 hash and OpenTimestamps proof created for legal traceability.</div>
+                </div>
+            </div>
+
+            <h3>Cryptographic Proof of Origin</h3>
+            <p>
+                To establish irrefutable proof of intellectual property ownership and development timeline,
+                a comprehensive timestamp analysis has been anchored on the Bitcoin blockchain using OpenTimestamps.
+            </p>
+
+            <div class="proof-box">
+                <h4>Blockchain Timestamp Details</h4>
+                <div class="proof-item">
+                    <span class="proof-label">Archive Date</span>
+                    <span class="proof-value">2026-01-28 10:00:39 CET</span>
+                </div>
+                <div class="proof-item">
+                    <span class="proof-label">Bitcoin Block</span>
+                    <span class="proof-value">934075</span>
+                </div>
+                <div class="proof-item">
+                    <span class="proof-label">Block Timestamp</span>
+                    <span class="proof-value">2026-01-28 11:04:01 CET (1769594641 Unix)</span>
+                </div>
+                <div class="proof-item">
+                    <span class="proof-label">Transaction ID</span>
+                    <span class="proof-value">937f1e849b25d9ed69d5ccd417ae08ed286452231090918fa996447149d8c29f</span>
+                </div>
+                <div class="proof-item">
+                    <span class="proof-label">Archive SHA-256</span>
+                    <span class="proof-value">34524454db245e62b1ce80ecd98eee63f7e777e7eaa6ecc9f1a95c4360493d7f</span>
+                </div>
+            </div>
+
+            <h4>Archive Contents</h4>
+            <p>The timestamped archive contains:</p>
+            <ul>
+                <li>Complete commit history analysis (102 commits across ai-prd and ai-prd-generator repositories)</li>
+                <li>Timestamp distribution showing 48% of commits between 18h-06h (evening/night)</li>
+                <li>13 commits between 00h-06h (night hours, impossible during standard work hours)</li>
+                <li>Detailed analysis demonstrating work conducted exclusively outside employment hours</li>
+                <li>Export of all commits with full timestamps and metadata</li>
+            </ul>
+
+            <h4>Verification</h4>
+            <p>The timestamp proof can be independently verified using OpenTimestamps:</p>
+            <div class="verification-steps">
+                <ol>
+                    <li>Install OpenTimestamps: <code>pip3 install opentimestamps-client</code></li>
+                    <li>Verify Bitcoin blockchain proof: <code>ots verify [archive.ots]</code></li>
+                    <li>Verify archive integrity: <code>shasum -a 256 [archive.tar.gz]</code></li>
+                    <li>Compare hash with certified value: <code>34524454db245e62b1ce80ecd98eee63f7e777e7eaa6ecc9f1a95c4360493d7f</code></li>
+                </ol>
+            </div>
+
+            <h3>Open Source License</h3>
+            <p>
+                The core library is released under <strong>MIT License</strong>, providing maximum freedom for use, modification, and distribution.
+                The full source code is available on <a href="https://github.com/cdeust/ai-prd" target="_blank">GitHub</a>.
+            </p>
+
+            <h4>Commercial Pilot Programs</h4>
+            <p>
+                While the core technology is open-source, commercial pilot programs provide:
+            </p>
+            <ul>
+                <li>Dedicated technical support and integration assistance</li>
+                <li>Custom template development for specific organizational processes</li>
+                <li>Formal evaluation framework and reporting</li>
+                <li>Priority feature development aligned with pilot organization needs</li>
+                <li>Access to commercial secured distribution (XCFramework with license protection)</li>
+                <li>Optional exclusivity agreements for specific sectors</li>
+            </ul>
+
+            <h3>Transparency Commitment</h3>
+            <p>
+                All development activity is publicly traceable on GitHub. The blockchain timestamp provides cryptographic proof
+                that cannot be forged or backdated. This level of transparency ensures:
+            </p>
+            <ul>
+                <li>Clear intellectual property ownership</li>
+                <li>Verifiable development timeline</li>
+                <li>Proof of independent development outside employment obligations</li>
+                <li>Full traceability for legal purposes if required</li>
+            </ul>
+
+            <h3>Contact</h3>
+            <p>
+                For questions regarding intellectual property, licensing, or verification of timestamp proof:
+            </p>
+            <ul>
+                <li>Email: <a href="mailto:cdeust@icloud.com">cdeust@icloud.com</a></li>
+                <li>GitHub: <a href="https://github.com/cdeust" target="_blank">@cdeust</a></li>
+                <li>LinkedIn: <a href="https://www.linkedin.com/in/clementdeust" target="_blank">Clément Deust</a></li>
+            </ul>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>AI-PRD Generator | <a href="https://github.com/cdeust/ai-prd" target="_blank">GitHub</a> | <a href="https://github.com/cdeust" target="_blank">Clément Deust</a></p>
+            <p style="margin-top: 8px; font-size: 13px;">Blockchain timestamp proof: Bitcoin Block 934075 | SHA-256: 34524454...493d7f</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-PRD Generator | Production-grade PRD Automation</title>
+    <meta name="description" content="Multi-engine architecture for automated PRD generation. RAG + Vision + Chain of Verification. From 3-5 days to hours.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #fafafa;
+            --bg-secondary: #ffffff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #666666;
+            --border: #e0e0e0;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+            --danger: #dc2626;
+            --success: #16a34a;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 24px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        header nav a {
+            margin-left: 32px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        header nav a:hover {
+            color: var(--text-primary);
+        }
+
+        .hero {
+            padding: 120px 0 80px;
+            text-align: center;
+        }
+
+        .hero h2 {
+            font-size: 48px;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 24px;
+            letter-spacing: -0.02em;
+        }
+
+        .hero .subtitle {
+            font-size: 20px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        .hero .metrics {
+            display: flex;
+            justify-content: center;
+            gap: 48px;
+            margin-top: 48px;
+        }
+
+        .hero .metric {
+            text-align: center;
+        }
+
+        .hero .metric-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .hero .metric-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        section {
+            padding: 80px 0;
+        }
+
+        section:nth-child(even) {
+            background: var(--bg-secondary);
+        }
+
+        h3 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            letter-spacing: -0.01em;
+        }
+
+        .section-subtitle {
+            font-size: 18px;
+            color: var(--text-secondary);
+            margin-bottom: 48px;
+            max-width: 800px;
+        }
+
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 32px;
+            margin-top: 48px;
+        }
+
+        .problem-card {
+            padding: 32px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        section:nth-child(even) .problem-card {
+            background: var(--bg-secondary);
+        }
+
+        .problem-card h4 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .problem-card p {
+            color: var(--text-secondary);
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .status-danger {
+            background: var(--danger);
+        }
+
+        .status-success {
+            background: var(--success);
+        }
+
+        .architecture-diagram {
+            margin: 48px 0;
+            padding: 48px 24px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .flow-layer {
+            margin-bottom: 32px;
+            text-align: center;
+        }
+
+        .flow-layer:last-child {
+            margin-bottom: 0;
+        }
+
+        .layer-title {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        .flow-row {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .flow-box {
+            padding: 24px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            flex: 1;
+            min-width: 200px;
+            max-width: 280px;
+            text-align: center;
+            font-size: 15px;
+            line-height: 1.8;
+        }
+
+        .flow-box strong {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        .flow-box span {
+            font-size: 14px;
+            color: var(--text-secondary);
+            display: block;
+            margin-top: 4px;
+        }
+
+        .flow-box.accent {
+            border-color: var(--accent);
+        }
+
+        .flow-box.success {
+            border-color: var(--success);
+        }
+
+        .flow-arrow {
+            font-size: 32px;
+            color: var(--text-secondary);
+            margin: 16px 0;
+            text-align: center;
+        }
+
+        section:nth-child(even) .architecture-diagram {
+            background: var(--bg-secondary);
+        }
+
+        .comparison-table {
+            width: 100%;
+            margin-top: 48px;
+            border-collapse: collapse;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 16px 24px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .comparison-table th {
+            background: var(--bg-primary);
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+        }
+
+        .comparison-table td {
+            font-size: 15px;
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .comparison-table .metric {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .pilot-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 32px;
+            margin-top: 48px;
+        }
+
+        .pilot-card {
+            padding: 40px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .pilot-card.recommended {
+            border-color: var(--accent);
+        }
+
+        .pilot-card.recommended::before {
+            content: 'RECOMMENDED';
+            position: absolute;
+            top: -12px;
+            left: 40px;
+            background: var(--accent);
+            color: white;
+            padding: 4px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            border-radius: 4px;
+        }
+
+        .pilot-card h4 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .pilot-card .price {
+            font-size: 48px;
+            font-weight: 700;
+            margin: 24px 0;
+            color: var(--text-primary);
+        }
+
+        .pilot-card .price-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: -16px;
+            margin-bottom: 24px;
+        }
+
+        .pilot-card ul {
+            list-style: none;
+            margin-bottom: 32px;
+        }
+
+        .pilot-card li {
+            padding: 12px 0;
+            color: var(--text-secondary);
+            font-size: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .pilot-card li:last-child {
+            border-bottom: none;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 14px 32px;
+            background: var(--accent);
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 15px;
+            border-radius: 6px;
+            transition: background 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .cta-button:hover {
+            background: var(--accent-hover);
+        }
+
+        .cta-button.secondary {
+            background: transparent;
+            color: var(--accent);
+            border: 2px solid var(--accent);
+        }
+
+        .cta-button.secondary:hover {
+            background: var(--accent);
+            color: white;
+        }
+
+        .contact-form {
+            max-width: 600px;
+            margin: 48px auto 0;
+            padding: 48px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 15px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        footer {
+            padding: 48px 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .hero h2 {
+                font-size: 32px;
+            }
+
+            .hero .metrics {
+                flex-direction: column;
+                gap: 32px;
+            }
+
+            .problem-grid,
+            .pilot-options {
+                grid-template-columns: 1fr;
+            }
+
+            .comparison-table {
+                font-size: 13px;
+            }
+
+            .comparison-table th,
+            .comparison-table td {
+                padding: 12px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>AI-PRD Generator</h1>
+            <nav>
+                <a href="#architecture">Architecture</a>
+                <a href="#benchmarks">Benchmarks</a>
+                <a href="#pilots">Pilots</a>
+                <a href="legal.html">Legal & Integrity</a>
+                <a href="#contact">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h2>Production-grade PRD Automation</h2>
+            <p class="subtitle">Multi-engine architecture: RAG + Vision + Chain of Verification</p>
+            <p class="subtitle">From 3-5 days to hours</p>
+
+            <div class="metrics">
+                <div class="metric">
+                    <div class="metric-value">3-5 days</div>
+                    <div class="metric-label">Traditional PRD Process</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">Few hours</div>
+                    <div class="metric-label">With AI-PRD Generator</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">60%</div>
+                    <div class="metric-label">Institutions with PRD Bottleneck</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <h3>The PRD Bottleneck</h3>
+            <p class="section-subtitle">In 60% of software organizations, PRD creation is identified as a critical bottleneck in the delivery pipeline.</p>
+
+            <div class="problem-grid">
+                <div class="problem-card">
+                    <h4><span class="status-indicator status-danger"></span>Fragmented Manual Process</h4>
+                    <p>Multiple handoffs between Product Managers, Architects, and Developers. Each iteration adds 1-2 days of latency.</p>
+                </div>
+                <div class="problem-card">
+                    <h4><span class="status-indicator status-danger"></span>Inconsistency Risk</h4>
+                    <p>Manual PRDs often contain contradictions between sections, discovered late in implementation phase.</p>
+                </div>
+                <div class="problem-card">
+                    <h4><span class="status-indicator status-danger"></span>External Consultant Cost</h4>
+                    <p>5-10k€ per external PRD consultant. 10 PRDs per quarter = 50-100k€ annual cost.</p>
+                </div>
+                <div class="problem-card">
+                    <h4><span class="status-indicator status-danger"></span>Delayed Time-to-Market</h4>
+                    <p>3-5 days per PRD × 40 PRDs/year = 120-200 days of accumulated bottleneck.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="architecture">
+        <div class="container">
+            <h3>Technical Architecture</h3>
+            <p class="section-subtitle">Multi-engine system combining Retrieval-Augmented Generation, Computer Vision, and Multi-LLM verification.</p>
+
+            <div class="architecture-diagram">
+                <div class="flow-layer">
+                    <div class="layer-title">INPUT LAYER</div>
+                    <div class="flow-row">
+                        <div class="flow-box">User Requirements</div>
+                        <div class="flow-box">Codebase Context</div>
+                        <div class="flow-box">Visual Mockups</div>
+                    </div>
+                    <div class="flow-arrow">↓</div>
+                </div>
+
+                <div class="flow-layer">
+                    <div class="layer-title">ANALYSIS ENGINES</div>
+                    <div class="flow-row">
+                        <div class="flow-box accent">
+                            <strong>RAG Engine</strong><br>
+                            <span>Vector Search</span><br>
+                            <span>Full-Text</span><br>
+                            <span>Code Patterns</span>
+                        </div>
+                        <div class="flow-box accent">
+                            <strong>Vision Engine</strong><br>
+                            <span>Mockup Parse</span><br>
+                            <span>UI Extraction</span><br>
+                            <span>Flow Analysis</span>
+                        </div>
+                        <div class="flow-box accent">
+                            <strong>Semantic Search</strong><br>
+                            <span>Hybrid Search</span><br>
+                            <span>Code Analysis</span><br>
+                            <span>Architecture</span>
+                        </div>
+                    </div>
+                    <div class="flow-arrow">↓</div>
+                </div>
+
+                <div class="flow-layer">
+                    <div class="layer-title">GENERATION</div>
+                    <div class="flow-row">
+                        <div class="flow-box accent" style="max-width: 600px; margin: 0 auto;">
+                            <strong>Generation Engine</strong><br>
+                            <span>Context Assembly → Section Generation → Standards Injection</span>
+                        </div>
+                    </div>
+                    <div class="flow-arrow">↓</div>
+                </div>
+
+                <div class="flow-layer">
+                    <div class="layer-title">VERIFICATION</div>
+                    <div class="flow-row">
+                        <div class="flow-box success" style="max-width: 600px; margin: 0 auto;">
+                            <strong>Chain of Verification</strong><br>
+                            <span>Multi-LLM Judges (Claude Opus/Sonnet + others)</span><br>
+                            <span>Cross-validation • Consistency Check • 95%+ Confidence</span>
+                        </div>
+                    </div>
+                    <div class="flow-arrow">↓</div>
+                </div>
+
+                <div class="flow-layer">
+                    <div class="layer-title">OUTPUT</div>
+                    <div class="flow-row">
+                        <div class="flow-box success" style="max-width: 600px; margin: 0 auto;">
+                            <strong>Verified PRD</strong><br>
+                            <span>Coherent • Standards-compliant • Implementation-ready</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="problem-grid">
+                <div class="problem-card">
+                    <h4><span class="status-indicator status-success"></span>RAG Engine</h4>
+                    <p>Hybrid vector + full-text search on existing codebase. Extracts architectural patterns, constraints, and best practices.</p>
+                </div>
+                <div class="problem-card">
+                    <h4><span class="status-indicator status-success"></span>Vision Engine</h4>
+                    <p>Interprets visual mockups, wireframes, and UI designs. Converts visual concepts into functional requirements.</p>
+                </div>
+                <div class="problem-card">
+                    <h4><span class="status-indicator status-success"></span>Chain of Verification</h4>
+                    <p>Multi-LLM system (Claude Opus/Sonnet + others) cross-validates each section. Guarantees consistency before output.</p>
+                </div>
+                <div class="problem-card">
+                    <h4><span class="status-indicator status-success"></span>Standards Integration</h4>
+                    <p>SOLID, Clean Architecture, 12-factor app, OWASP security. Templates compatible with Confluence and Jira.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="benchmarks">
+        <div class="container">
+            <h3>Benchmarks</h3>
+            <p class="section-subtitle">Comparative analysis of traditional PRD workflow vs AI-PRD Generator.</p>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Traditional Process</th>
+                        <th>AI-PRD Generator</th>
+                        <th>Improvement</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="metric">Time per PRD</td>
+                        <td>3-5 days</td>
+                        <td>Few hours</td>
+                        <td>60-80% reduction</td>
+                    </tr>
+                    <tr>
+                        <td class="metric">Internal Cost (10 PRDs)</td>
+                        <td>30-50 dev days</td>
+                        <td>5-10 dev days</td>
+                        <td>75% reduction</td>
+                    </tr>
+                    <tr>
+                        <td class="metric">External Consultant Cost</td>
+                        <td>5-10k€ per PRD</td>
+                        <td>Pilot: 12-30k€ (unlimited PRDs)</td>
+                        <td>Break-even at 3-6 PRDs</td>
+                    </tr>
+                    <tr>
+                        <td class="metric">Consistency Guarantee</td>
+                        <td>Manual review required</td>
+                        <td>95%+ confidence via multi-LLM verification</td>
+                        <td>Automated validation</td>
+                    </tr>
+                    <tr>
+                        <td class="metric">Standards Compliance</td>
+                        <td>Depends on author expertise</td>
+                        <td>SOLID, Clean Arch, OWASP integrated</td>
+                        <td>Guaranteed</td>
+                    </tr>
+                    <tr>
+                        <td class="metric">Codebase Context</td>
+                        <td>Manual analysis required</td>
+                        <td>Automatic RAG extraction</td>
+                        <td>Zero overhead</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section id="pilots">
+        <div class="container">
+            <h3>Pilot Programs</h3>
+            <p class="section-subtitle">Structured evaluation programs for production integration. Open-source MIT license with commercial support options.</p>
+
+            <div class="pilot-options">
+                <div class="pilot-card">
+                    <h4>Evaluation Pilot</h4>
+                    <div class="price">12k€</div>
+                    <div class="price-label">6 weeks</div>
+                    <ul>
+                        <li>Up to 5 users</li>
+                        <li>Minimum 10 PRDs</li>
+                        <li>48h support response time</li>
+                        <li>Evaluation framework</li>
+                        <li>Synthesis report</li>
+                        <li>Non-exclusive license</li>
+                        <li>4k€ refund guarantee if framework doesn't meet expectations</li>
+                    </ul>
+                    <a href="#contact" class="cta-button secondary">Apply Below</a>
+                </div>
+
+                <div class="pilot-card recommended">
+                    <h4>Integration Pilot</h4>
+                    <div class="price">30k€</div>
+                    <div class="price-label">8 weeks</div>
+                    <ul>
+                        <li>Up to 15 users</li>
+                        <li>Minimum 20 PRDs</li>
+                        <li>24h priority support</li>
+                        <li>Custom templates for internal processes</li>
+                        <li>12-month financial sector exclusivity</li>
+                        <li>Early access to commercial secured version (XCFramework)</li>
+                        <li>Shared roadmap (your priorities become development priorities)</li>
+                        <li>Post-pilot license at -30% preferential rate</li>
+                    </ul>
+                    <a href="#contact" class="cta-button">Apply Below</a>
+                </div>
+            </div>
+
+            <div style="margin-top: 48px; padding: 24px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px;">
+                <h4 style="font-size: 16px; font-weight: 600; margin-bottom: 12px;">Two Editions Available</h4>
+                <p style="color: var(--text-secondary); font-size: 15px; line-height: 1.6; margin-bottom: 16px;">
+                    <strong>Freemium Edition</strong> (ai-prd-generator):<br>
+                    Open-source Claude Skill under MIT license. Available on <a href="https://github.com/cdeust/ai-prd-generator" target="_blank" style="color: var(--accent);">GitHub</a>.
+                    Self-installation via README. No support included.
+                </p>
+                <p style="color: var(--text-secondary); font-size: 15px; line-height: 1.6;">
+                    <strong>Commercial Edition</strong> (ai-architect-prd-builder):<br>
+                    Secured distribution (XCFramework with license protection). Included in pilot programs with dedicated support,
+                    custom templates, priority feature development, and enterprise integrations.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact">
+        <div class="container" style="text-align: center;">
+            <h3>Start a Pilot</h3>
+            <p class="section-subtitle" style="margin: 0 auto;">Technical evaluation or production integration. Reach out to discuss your PRD workflow challenges.</p>
+
+            <div class="contact-form">
+                <p style="color: var(--text-secondary); font-size: 15px; margin-bottom: 24px; text-align: center;">
+                    Apply for a pilot program. Specify which option (Evaluation 12k€ or Integration 30k€) in your message.
+                </p>
+                <iframe
+                    data-tally-src="https://tally.so/embed/J9O5EX?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1"
+                    loading="lazy"
+                    width="100%"
+                    height="800"
+                    frameborder="0"
+                    marginheight="0"
+                    marginwidth="0"
+                    title="AI-PRD Pilot Request"
+                    style="border-radius: 8px;">
+                </iframe>
+                <script>
+                    var d=document,w="https://tally.so/widgets/embed.js",v=function(){"undefined"!=typeof Tally?Tally.loadEmbeds():d.querySelectorAll("iframe[data-tally-src]:not([src])").forEach((function(e){e.src=e.dataset.tallySrc}))};if("undefined"!=typeof Tally)v();else if(d.querySelector('script[src="'+w+'"]')==null){var s=d.createElement("script");s.src=w,s.onload=v,s.onerror=v,d.body.appendChild(s);}
+                </script>
+                <p style="color: var(--text-secondary); font-size: 13px; margin-top: 16px; text-align: center;">
+                    Alternative: <a href="mailto:cdeust@icloud.com?subject=AI-PRD%20Pilot%20Request" style="color: var(--accent);">Contact via email</a>
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>AI-PRD Generator | <a href="https://github.com/cdeust/ai-prd" target="_blank">GitHub</a> | <a href="https://github.com/cdeust" target="_blank">Clément Deust</a> | <a href="legal.html">Legal & Integrity</a></p>
+            <p style="margin-top: 8px; font-size: 13px;">Open-source core (MIT) | Commercial pilots available | Blockchain timestamp proof available</p>
+        </div>
+    </footer>
+</body>
+</html>
