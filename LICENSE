@@ -1,0 +1,65 @@
+Commercial Software License
+
+Copyright (c) 2026 Clement DEUST. All Rights Reserved.
+
+This software and its associated documentation files (the "Software") are
+proprietary commercial software protected by copyright law and international
+treaties.
+
+LICENSED USE:
+The Software may only be used by individuals or organizations that hold a
+valid license issued by the copyright holder. Licenses are hardware-bound
+and cryptographically signed using Ed25519 digital signatures.
+
+PERMITTED USES (with valid license):
+- Use of the Software on the licensed machine
+- Integration into products and services per the license terms
+- Access to all features enabled by the license tier
+
+PROHIBITED USES (without valid license):
+- Use of the Software beyond the free tier
+- Redistribution, sublicensing, or resale
+- Reverse engineering, decompilation, or disassembly
+- Circumvention of hardware binding or license validation
+- Removal or modification of license enforcement mechanisms
+- Distribution of license keys or encrypted framework decryption keys
+
+FREE TIER:
+A limited free tier is available without a license, providing:
+- Basic thinking strategies (Zero-Shot, Chain of Thought)
+- Basic keyword search (RAG)
+- Basic LLM verification check
+- Feature and Bug PRD types only
+
+INTELLECTUAL PROPERTY:
+The Software contains proprietary algorithms and trade secrets including:
+- Vision Engine with Apple Foundation Models (180+ components)
+- Business KPIs (8 metric systems with documented baselines)
+- Context-aware PRD generation (8 adaptive templates)
+- Research-weighted strategy selection (15 strategies)
+- Multi-hop RAG with contextual BM25 (+49% precision)
+- Multi-judge verification engine with KS adaptive consensus
+- Hardware-bound encrypted XCFramework distribution
+- Ed25519 license signing and validation
+
+ENCRYPTED DISTRIBUTION:
+Engine packages are distributed as AES-256-GCM encrypted XCFrameworks.
+Each encrypted framework is bound to the licensee's hardware fingerprint
+and can only be decrypted with a valid, hardware-matched license.
+
+NO WARRANTY:
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY.
+
+TERMINATION:
+This license terminates automatically if you breach any of its terms.
+Upon termination, you must destroy all copies of the Software and
+encrypted frameworks in your possession.
+
+For questions or licensing:
+Contact: clement.deust@proton.me
+
+Version: 1.0.0-mvp
+Last Updated: February 7, 2026
