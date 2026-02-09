@@ -1,0 +1,495 @@
+{
+  "version": "7.2.0",
+  "name": "AI Architect PRD Builder",
+  "description": "Enterprise PRD generation with VisionEngine (Apple Foundation Models, 180+ components), Business KPIs (8 metric systems), 8 context-aware PRD types, real-time LLM streaming, license-aware tiered architecture (trial/free/licensed), 15 RAG-enhanced thinking strategies, research-based prioritization, MCP server with 7 utility tools, and Cowork plugin support",
+  "license": {
+    "tiers": ["trial", "free", "licensed"],
+    "default_tier": "free",
+    "validation": {
+      "method": "cryptographic",
+      "validator_binary": "~/.aiprd/validate-license",
+      "build_command": "make build-validator",
+      "verification": {
+        "license_file": "Ed25519 signature + hardware fingerprint + expiry",
+        "trial_file": "HMAC-SHA256 tamper detection + hardware fingerprint + expiry"
+      }
+    },
+    "license_resolution": [
+      { "priority": 1, "source": "~/.aiprd/license.json", "condition": "Ed25519 signature verified, hardware match, not expired", "result": "licensed" },
+      { "priority": 2, "source": "~/.aiprd/trial.json", "condition": "HMAC valid, hardware match, not expired", "result": "trial" },
+      { "priority": 3, "source": "auto-create trial", "condition": "no existing trial", "result": "trial" },
+      { "priority": 4, "source": "default", "condition": "validator missing or all checks fail", "result": "free" }
+    ],
+    "trial": {
+      "duration_days": 14,
+      "storage_path": "~/.aiprd/trial.json",
+      "features": "licensed",
+      "purchase_url": "https://aiprd.dev/purchase",
+      "security": "HMAC-SHA256 keyed from hardware fingerprint"
+    },
+    "free_tier": {
+      "strategies": ["zero_shot", "chain_of_thought"],
+      "prd_contexts": ["feature", "bug"],
+      "max_clarification_rounds": 3,
+      "max_clarification_questions": 5,
+      "verification": "basic",
+      "rag_max_hops": 1,
+      "sections_limit": 6,
+      "business_kpis": "summary_only"
+    },
+    "trial_tier": {
+      "strategies": "all",
+      "prd_contexts": "all",
+      "max_clarification_rounds": "unlimited",
+      "max_clarification_questions": "context_aware",
+      "verification": "full",
+      "rag_max_hops": "context_aware",
+      "sections_limit": "context_aware",
+      "business_kpis": "full"
+    },
+    "licensed_tier": {
+      "strategies": "all",
+      "prd_contexts": "all",
+      "max_clarification_rounds": "unlimited",
+      "max_clarification_questions": "context_aware",
+      "verification": "full",
+      "rag_max_hops": "context_aware",
+      "sections_limit": "context_aware",
+      "business_kpis": "full"
+    }
+  },
+  "prd_contexts": {
+    "available": ["proposal", "feature", "bug", "incident", "poc", "mvp", "release", "cicd"],
+    "free_tier_access": ["feature", "bug"],
+    "trial_tier_access": "all",
+    "licensed_tier_access": "all",
+    "configurations": {
+      "proposal": {
+        "clarification_range": [5, 6],
+        "sections": 7,
+        "rag_hops": 1,
+        "focus": "business_value"
+      },
+      "feature": {
+        "clarification_range": [8, 10],
+        "sections": 11,
+        "rag_hops": 3,
+        "focus": "technical_depth"
+      },
+      "bug": {
+        "clarification_range": [6, 8],
+        "sections": 6,
+        "rag_hops": 3,
+        "focus": "root_cause"
+      },
+      "incident": {
+        "clarification_range": [10, 12],
+        "sections": 8,
+        "rag_hops": 4,
+        "focus": "forensic_investigation"
+      },
+      "poc": {
+        "clarification_range": [4, 5],
+        "sections": 5,
+        "rag_hops": 2,
+        "focus": "feasibility_validation"
+      },
+      "mvp": {
+        "clarification_range": [6, 7],
+        "sections": 8,
+        "rag_hops": 2,
+        "focus": "core_value"
+      },
+      "release": {
+        "clarification_range": [9, 11],
+        "sections": 10,
+        "rag_hops": 3,
+        "focus": "production_readiness"
+      },
+      "cicd": {
+        "clarification_range": [7, 9],
+        "sections": 9,
+        "rag_hops": 3,
+        "focus": "pipeline_automation"
+      }
+    }
+  },
+  "clarification": {
+    "confidence_threshold": 0.90,
+    "min_questions_per_round": 2,
+    "max_questions_per_round": 5
+  },
+  "rag": {
+    "enabled": true,
+    "engine": "AIPRDRAGEngine",
+    "features": {
+      "contextual_bm25": true,
+      "precision_improvement": "+49%",
+      "hybrid_search": true,
+      "token_aware_chunking": true
+    },
+    "chunk_size": 1000,
+    "chunk_overlap": 200,
+    "max_results": 10,
+    "similarity_threshold": 0.7
+  },
+  "vision": {
+    "enabled": true,
+    "engine": "AIPRDVisionEngine",
+    "provider": "apple_foundation_models",
+    "fallback_providers": ["anthropic", "openai", "gemini", "apple_vision", "bedrock"],
+    "max_retries": 3,
+    "components": {
+      "total_types": 180,
+      "platforms": ["apple_hig", "material_design_3", "vaadin_javafx", "web"],
+      "lora_adapters": ["swiftui", "uikit", "material_design", "enterprise_java"]
+    },
+    "features": {
+      "on_device_inference": true,
+      "graceful_degradation": true,
+      "tiled_analysis": true,
+      "zero_cost_local": true
+    }
+  },
+  "business_kpis": {
+    "enabled": true,
+    "metric_systems": 8,
+    "systems": {
+      "business_kpis": {
+        "metrics": ["timeSavingsPercent", "qualityImprovementPercent", "costSavingsPercent", "tokenEfficiencyRatio"],
+        "baselines": "industry_benchmarks"
+      },
+      "baseline_definitions": {
+        "configurable": true,
+        "factory_method": "BaselineConfiguration.makeDefault()",
+        "injection_point": "BusinessKPIsFactory",
+        "configurations": {
+          "writing_time": {
+            "simple_minutes": 150,
+            "standard_minutes": 300,
+            "complex_minutes": 420,
+            "configurable_per_sector": true
+          },
+          "quality": {
+            "naive_llm": 0.55,
+            "basic_prompt_engineering": 0.65,
+            "senior_manual": 0.80,
+            "target_with_rag": 0.85
+          },
+          "tokens": {
+            "base_context": 8000,
+            "per_section": 4000,
+            "naive_multiplier": 2.0,
+            "optimized_multiplier": 0.6
+          },
+          "cost_per_1k_tokens_2026": {
+            "claude-opus-4-5": 0.015,
+            "claude-sonnet-4": 0.003,
+            "gpt-5": 0.01,
+            "gpt-5-turbo": 0.005,
+            "gemini-2.0-pro": 0.007,
+            "gemini-2.0-flash": 0.002
+          },
+          "llm_calls": {
+            "naive_per_section": 2,
+            "optimized_batch_size": 2,
+            "verification_passes": 2
+          },
+          "rag_precision": {
+            "naive_keyword": 0.35,
+            "basic_vector": 0.55,
+            "optimized_bm25": 0.75,
+            "target_contextual": 0.85
+          }
+        }
+      },
+      "template_business_kpis": {
+        "metrics": ["timeSavedSeconds", "qualityImprovement", "tokensSaved", "templateHitRate"]
+      },
+      "strategy_business_kpis": {
+        "metrics": ["qualityImprovementPercent", "costMultiplier", "efficiencyScore", "isWorthTheCost"]
+      },
+      "vision_business_kpis": {
+        "metrics": ["precision", "recall", "f1Score", "timeSavingsPercent", "costSavingsPercent"],
+        "baseline_manual_time_minutes": 25
+      },
+      "reasoning_enhancement_metrics": {
+        "total_kpis": 30,
+        "categories": ["accuracy", "cost", "efficiency", "templates", "stall_recovery", "signals"]
+      },
+      "provider_metrics": {
+        "metrics": ["successRate", "averageDuration", "averageConfidence"]
+      },
+      "strategy_effectiveness_tracker": {
+        "metrics": ["expectedImprovement", "actualConfidenceGain", "complianceRate"]
+      }
+    }
+  },
+  "verification": {
+    "enabled": true,
+    "engine": "AIPRDVerificationEngine",
+    "patentable_features": [
+      "ks_adaptive_consensus",
+      "zero_llm_graph_verification",
+      "multi_agent_debate_convergence",
+      "complexity_aware_selection",
+      "hot_swap_protocols",
+      "unified_pipeline"
+    ],
+    "strategies": {
+      "claim_generation": ["question_based", "atomic_decomposition", "hybrid"],
+      "evaluation": ["independent_judges", "debate_judges", "nli_entailment", "graph_constrained"],
+      "consensus": ["weighted_average", "adaptive_stability", "bayesian"]
+    },
+    "defaults": {
+      "num_judges": 3,
+      "consensus_threshold": 0.66,
+      "ks_stability_threshold": 0.1,
+      "debate_max_rounds": 3,
+      "debate_convergence_threshold": 0.05
+    }
+  },
+  "meta_prompting": {
+    "enabled": true,
+    "engine": "AIPRDMetaPromptingEngine",
+    "files": 205,
+    "lines_of_code": 12179,
+    "patentable_features": [
+      "signal_bus_cross_enhancement",
+      "confidence_fusion_learned_weights",
+      "template_guided_expansion",
+      "cross_enhancement_stall_recovery",
+      "bidirectional_feedback_loops",
+      "trm_statistical_halting",
+      "real_time_llm_streaming"
+    ],
+    "streaming": {
+      "enabled": true,
+      "on_chunk_callback": true,
+      "automatic_fallback": true,
+      "backward_compatible": true,
+      "streaming_strategies": [
+        "zero_shot",
+        "few_shot",
+        "analyze_problem",
+        "problem_analysis",
+        "plan_and_solve",
+        "generate_knowledge",
+        "prompt_chaining",
+        "meta_prompting"
+      ]
+    }
+  },
+  "strategy_engine": {
+    "enabled": true,
+    "engine": "AIPRDStrategyEngine",
+    "research_sources": [
+      "MIT", "Stanford", "Harvard", "ETH Zürich", "Princeton",
+      "Google", "Anthropic", "OpenAI", "DeepSeek"
+    ],
+    "patentable_features": [
+      "research_evidence_database",
+      "research_weighted_selector",
+      "strategy_enforcement_engine",
+      "strategy_compliance_validator",
+      "strategy_effectiveness_tracker"
+    ],
+    "components": {
+      "selector": "ResearchWeightedSelector",
+      "enforcer": "StrategyEnforcementEngine",
+      "validator": "StrategyComplianceValidator",
+      "tracker": "StrategyEffectivenessTracker"
+    },
+    "license_tiers": {
+      "free": ["chain_of_thought", "zero_shot"],
+      "trial": "all",
+      "licensed": "all"
+    },
+    "expected_gains": {
+      "strategy_hit_rate": ">85%",
+      "compliance_rate": ">90%",
+      "improvement_accuracy": "±10%",
+      "underperformance_detection": "<5%"
+    }
+  },
+  "thinking": {
+    "default_strategy": "verified_reasoning",
+    "extended_thinking_enabled": true,
+    "rag_integration": {
+      "enabled": true,
+      "codebase_context": true,
+      "pattern_extraction": ["Repository", "Service", "Factory", "Observer", "Strategy", "MVVM", "Clean Architecture"],
+      "entity_extraction": true
+    },
+    "strategy_prioritization": {
+      "research_basis": "MIT/Stanford/Harvard/Anthropic/OpenAI/DeepSeek (2024-2025)",
+      "tier_1_most_effective": ["trm", "verified_reasoning", "self_consistency"],
+      "tier_2_highly_effective": ["tree_of_thoughts", "graph_of_thoughts", "react", "reflexion"],
+      "tier_3_contextual": ["few_shot", "meta_prompting", "plan_and_solve", "problem_analysis"],
+      "tier_4_basic": ["zero_shot", "chain_of_thought"]
+    },
+    "available_strategies": [
+      "trm",
+      "chain_of_thought",
+      "tree_of_thoughts",
+      "graph_of_thoughts",
+      "react",
+      "reflexion",
+      "plan_and_solve",
+      "verified_reasoning",
+      "recursive_refinement",
+      "zero_shot",
+      "few_shot",
+      "self_consistency",
+      "generate_knowledge",
+      "prompt_chaining",
+      "multimodal_cot",
+      "meta_prompting",
+      "problem_analysis"
+    ],
+    "enhancement_integration": {
+      "enabled": true,
+      "engine": "IntegratedReasoningEngine",
+      "components": {
+        "signal_bus": "ReasoningSignalBus",
+        "confidence_fusion": "ConfidenceFusionEngine",
+        "orchestrator": "EnhancementOrchestrator",
+        "enhancements": [
+          "ThoughtBufferEnhancement",
+          "AdaptiveExpansionEnhancement",
+          "CollaborativeInferenceEnhancement",
+          "MetacognitiveEnhancement"
+        ]
+      },
+      "novel_features": [
+        "signal_bus_pub_sub_coordination",
+        "template_guided_expansion_parameters",
+        "cross_enhancement_stall_recovery",
+        "learned_confidence_fusion_with_bias_correction",
+        "bidirectional_feedback_loops"
+      ],
+      "kpi_tracking": {
+        "enabled": true,
+        "metrics_class": "ReasoningEnhancementMetrics",
+        "total_kpis": 30
+      },
+      "expected_gains": {
+        "accuracy_improvement": "+12-22%",
+        "cost_reduction": "35-55%",
+        "early_termination_rate": "40-60%",
+        "stall_recovery_rate": ">75%",
+        "signal_effectiveness": ">60%"
+      }
+    }
+  },
+  "orchestration": {
+    "enabled": true,
+    "engine": "AIPRDOrchestrationEngine",
+    "files": 194,
+    "components": {
+      "requirement_analyzer": "RequirementAnalyzer",
+      "section_clarification": "SectionClarificationService",
+      "adaptive_temperature": "AdaptiveTemperatureStrategy",
+      "user_engagement": "UserEngagementAnalyzer",
+      "jira_formatter": "JiraTicketFormatter",
+      "token_counter": "TokenCounter"
+    },
+    "clarification_contexts": ["mvp", "feature", "poc", "bug", "incident", "release", "cicd", "proposal"],
+    "features": {
+      "adaptive_questioning": true,
+      "section_by_section_generation": true,
+      "jira_ticket_formatting": true,
+      "token_aware_budgeting": true,
+      "verification_integration": true
+    }
+  },
+  "encryption": {
+    "enabled": true,
+    "engine": "AIPRDEncryptionEngine",
+    "files": 25,
+    "pii_detection": {
+      "stages": 3,
+      "pipeline": ["regex", "ner", "llm"],
+      "patterns": ["ssn", "credit_card", "email", "phone", "passport"],
+      "confidence_threshold": 0.8,
+      "env_var": "PII_DETECTION_ENABLED"
+    },
+    "injection_protection": {
+      "stages": 2,
+      "pipeline": ["regex_scanner", "heuristic_classifier"],
+      "regex_patterns": 9,
+      "heuristics": 4,
+      "env_var": "INJECTION_PROTECTION_ENABLED"
+    },
+    "token_vault": {
+      "algorithm": "AES-256-GCM",
+      "actor_based": true,
+      "thread_safe": true
+    }
+  },
+  "providers": {
+    "supported": ["anthropic", "openai", "gemini", "apple_intelligence", "bedrock", "openrouter", "qwen", "zhipu", "moonshot", "minimax"],
+    "chinese_providers": {
+      "qwen": { "api_compatible": "openai", "base_url": "custom" },
+      "zhipu": { "api_compatible": "openai", "base_url": "custom" },
+      "moonshot": { "api_compatible": "openai", "base_url": "custom" },
+      "minimax": { "api_compatible": "openai", "base_url": "custom" }
+    },
+    "default": "anthropic"
+  },
+  "output": {
+    "format": "markdown",
+    "include_metadata": true,
+    "include_confidence_scores": true,
+    "include_verification_results": true,
+    "include_reasoning_metrics": true,
+    "reasoning_kpis": [
+      "confidence_gain_percent",
+      "token_savings_percent",
+      "llm_call_savings_percent",
+      "early_termination_rate",
+      "template_hit_rate",
+      "stall_recovery_rate",
+      "signal_effectiveness_rate",
+      "cross_enhancement_events"
+    ]
+  },
+  "integrations": {
+    "github": {
+      "enabled": true,
+      "auth_method": "gh_cli",
+      "scopes": ["repo", "read:org"]
+    },
+    "jira": {
+      "enabled": false,
+      "url": "",
+      "client_id": "",
+      "client_secret": "",
+      "project_key": ""
+    }
+  },
+  "plugin": {
+    "name": "ai-prd-builder",
+    "version": "7.2.0",
+    "engine_home": "~/.aiprd",
+    "install_command": "make install-engine",
+    "mcp_server": {
+      "transport": "stdio",
+      "command": "node ${CLAUDE_PLUGIN_ROOT}/mcp-server/index.js",
+      "tools": [
+        "validate_license",
+        "get_license_features",
+        "get_config",
+        "read_skill_config",
+        "check_health",
+        "get_prd_context_info",
+        "list_available_strategies"
+      ]
+    },
+    "commands": [
+      "generate-prd",
+      "validate-license",
+      "index-codebase"
+    ]
+  }
+}

@@ -1,0 +1,59 @@
+# Build artifacts
+.build/
+*.xcodeproj
+*.xcworkspace
+.swiftpm/
+DerivedData/
+build/
+
+# macOS
+.DS_Store
+._*
+
+# IDE
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.log
+*.swp
+*.swo
+*~
+
+# Database
+postgres-data/
+*.db
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Distribution
+*.zip
+
+# Testing
+.build-test/
+test-output/
+
+# Documentation build artifacts
+.doctrees/
+_build/
+
+# Private keys (NEVER commit)
+private-key.pem
+*.pem
+
+# Decrypted frameworks (generated locally by setup-frameworks.sh)
+# Only frameworks/encrypted/ is committed
+frameworks/*.xcframework
+!frameworks/encrypted/
+
+# Decrypted source packages (generated locally by setup-frameworks.sh)
+# These are extracted to packages/ from encrypted .source-package archives
+packages/AIPRDVisionEngine/
+packages/AIPRDVisionEngineApple/

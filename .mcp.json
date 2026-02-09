@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "ai-prd-builder": {
+      "command": "node",
+      "args": ["plugin/mcp-server/index.js"],
+      "env": {
+        "AIPRD_SKILL_CONFIG": "skill-config.json"
+      }
+    }
+  }
+}

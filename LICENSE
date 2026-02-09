@@ -1,0 +1,94 @@
+AI PRD Generator — Commercial Software License
+
+Copyright (c) 2026 Clement DEUST. All Rights Reserved.
+
+This software and its associated documentation files (the "Software") are
+proprietary commercial software protected by copyright law and international
+treaties.
+
+1. DEFINITIONS
+
+"License" means a valid, hardware-bound authorization issued by the copyright
+holder, cryptographically signed using Ed25519 digital signatures.
+
+"Free Tier" means the limited feature set available without a License.
+
+"Licensed Tier" means the full feature set available with a valid License.
+
+"Trial" means a time-limited (14-day) Licensed Tier evaluation period.
+
+2. GRANT OF LICENSE
+
+Subject to payment of applicable fees and compliance with these terms, the
+copyright holder grants you a non-exclusive, non-transferable license to use
+the Software on a single machine identified by its hardware fingerprint.
+
+License options:
+  - Monthly subscription: $79/month, cancellable anytime
+  - Lifetime license: $499 one-time, perpetual updates
+
+3. FREE TIER
+
+A limited free tier is available without a License, providing:
+  - Basic thinking strategies (Zero-Shot, Chain of Thought)
+  - Basic keyword search (RAG)
+  - Basic LLM verification check
+  - Feature and Bug PRD types only
+  - 3 clarification rounds maximum
+  - 6 sections per PRD maximum
+
+4. TRIAL
+
+A 14-day trial of the Licensed Tier is available at no cost. The trial is
+hardware-bound and HMAC-signed. No credit card required. Trial features
+revert to Free Tier upon expiration.
+
+5. PERMITTED USES (with valid License)
+
+  - Use of the Software on the licensed machine
+  - Integration into your products and services per the license terms
+  - Access to all features enabled by the license tier
+  - Use within Claude Code, Cowork, or compatible environments
+
+6. PROHIBITED USES
+
+  - Use of the Software beyond the Free Tier without a valid License
+  - Redistribution, sublicensing, or resale of the Software
+  - Reverse engineering, decompilation, or disassembly
+  - Circumvention of hardware binding or license validation
+  - Removal or modification of license enforcement mechanisms
+  - Distribution of license keys or encrypted framework decryption keys
+  - Sharing of a single License across multiple machines
+
+7. INTELLECTUAL PROPERTY
+
+The Software contains proprietary algorithms and trade secrets. All rights,
+title, and interest in the Software remain with the copyright holder.
+
+8. ENCRYPTED DISTRIBUTION
+
+Engine packages are distributed as AES-256-GCM encrypted XCFrameworks.
+Each encrypted framework is bound to the licensee's hardware fingerprint
+and can only be decrypted with a valid, hardware-matched License.
+
+9. NO WARRANTY
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY.
+
+10. TERMINATION
+
+This license terminates automatically if you breach any of its terms.
+Upon termination, you must destroy all copies of the Software and
+encrypted frameworks in your possession. The Free Tier remains available
+after termination of a paid License.
+
+11. CONTACT
+
+Purchase: https://aiprd.dev/purchase
+Support: support@aiprd.dev
+
+Version: 1.0.0
+Last Updated: February 12, 2026

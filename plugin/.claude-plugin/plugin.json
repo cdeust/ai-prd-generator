@@ -1,0 +1,8 @@
+{
+  "name": "ai-prd-builder",
+  "description": "Enterprise PRD generation with 8 engines, license-aware tiers, 15 thinking strategies, 8 PRD types, and production-ready specs",
+  "version": "7.2.1",
+  "author": {
+    "name": "AI PRD Builder"
+  }
+}
