@@ -457,7 +457,8 @@
   "integrations": {
     "github": {
       "enabled": true,
-      "auth_method": "gh_cli",
+      "auth_methods": ["device_flow", "gh_cli", "env_token"],
+      "client_id": "",
       "scopes": ["repo", "read:org"]
     },
     "jira": {

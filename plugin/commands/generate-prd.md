@@ -4,7 +4,10 @@ description: Generate a production-ready PRD with verification and business KPIs
 
 # Generate PRD
 
-First, call the `check_health` MCP tool to verify the server is operational and the license validator is available.
+First, call the `check_health` MCP tool to verify the server is operational. **Note the `environment` field** — it determines how codebase context is fetched:
+
+- `environment: "cowork"` → **No direct network access.** Do NOT use MCP GitHub tools (`fetch_github_tree`, `fetch_github_file`, `github_login`). Use WebFetch, WebSearch, or ask the user to paste code instead.
+- `environment: "cli"` → Full access. Use `gh` CLI or MCP GitHub tools for repo analysis.
 
 Then call the `validate_license` MCP tool to determine the current license tier.
 

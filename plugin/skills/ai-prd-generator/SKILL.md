@@ -14,7 +14,7 @@ plugin: ai-prd-builder
 engine_home: ${CLAUDE_PLUGIN_ROOT} (Cowork) or ~/.aiprd (CLI)
 ---
 
-# AI PRD Generator - Enterprise Edition (v7.2.0)
+# AI PRD Generator - Enterprise Edition (v7.2.2)
 
 I generate **production-ready** Product Requirements Documents with 8 independent engines: orchestration pipeline, encryption/PII protection, multi-LLM verification, and advanced reasoning strategies at every step.
 
@@ -448,15 +448,80 @@ The MCP server's `validate_license` tool handles resolution automatically:
 3. No valid trial → auto-create 14-day trial → **TRIAL**
 4. All checks fail → **FREE**
 
-**Cowork mode** (bundled in-plugin validation):
-1. `${PLUGIN_ROOT}/license.json` — file-based validation + not expired → **LICENSED**
-2. `~/.aiprd/license.json` — file-based validation + not expired → **LICENSED**
-3. `~/.aiprd/trial.json` — not expired → **TRIAL**
-4. No valid files → **FREE**
+**Cowork mode** (encrypted in-plugin validation):
+1. Encrypted activation blob in plugin cache directory (`.lk`) — AES-256 decrypted, Ed25519 verified, not expired → **LICENSED**
+2. No activation found → **FREE** (user calls `activate_license` once; persists in plugin cache directory which is saved locally on the user's machine)
+3. Note: plugin updates/reinstalls may clear the cache — user may need to re-activate after plugin updates
 
 ---
 
 ## WORKFLOW
+
+### Phase 0: Cowork Environment Awareness (Cowork mode ONLY)
+
+**When `check_health` returns `environment: "cowork"`, I adapt my behavior to the Cowork VM constraints.**
+
+**What is Cowork?** Claude Cowork runs inside an **isolated Ubuntu 22.04 ARM64 VM** on the user's local machine via Apple's Virtualization Framework. Understanding the VM's capabilities and limitations is critical:
+
+**What IS available in the Cowork VM:**
+- Node.js 22, Python 3.10, Ruby 3.0, TypeScript 5.9 (pre-installed)
+- git 2.34, ripgrep, jq, sqlite3, ffmpeg, pandoc, ImageMagick (pre-installed)
+- `pip install` works (pypi.org is allowlisted)
+- `npm install` works (registry.npmjs.org is allowlisted)
+- File access to user's shared folders via VirtioFS mounts
+- The plugin MCP server (index.js) running via Node.js
+
+**What is NOT available in the Cowork VM:**
+- `gh` CLI — NOT pre-installed, CANNOT be installed (github.com blocked by network)
+- `docker` — NOT available in the VM
+- `brew` — NOT available (Ubuntu, not macOS)
+- `psql` / PostgreSQL — NOT available
+- Network access to `github.com`, `api.github.com`, `raw.githubusercontent.com` — **BLOCKED by egress proxy allowlist** (403 Forbidden)
+- No browser — headless terminal environment only
+- No access to host filesystem outside of shared folders
+
+**CRITICAL RULES FOR COWORK:**
+- I NEVER attempt to clone repos from GitHub — network is blocked
+- I NEVER attempt to install gh, docker, or brew — they cannot work in this VM
+- I NEVER use WebFetch for GitHub URLs — they will fail with 403
+- I NEVER attempt to start PostgreSQL or any database container
+- I DO use file-based analysis (Glob/Grep/Read) on shared local directories
+- I DO ask the user to share their local codebase directory if they provide a GitHub URL
+- I DO install Python/Node packages if needed (pypi.org and npmjs.org are allowlisted)
+
+**Step 0.1 — No setup needed. Just verify:**
+
+```bash
+echo "=== Cowork VM Environment ==="
+echo "Node.js: $(node --version 2>/dev/null || echo 'NOT FOUND')"
+echo "Python: $(python3 --version 2>/dev/null || echo 'NOT FOUND')"
+echo "git: $(git --version 2>/dev/null || echo 'NOT FOUND')"
+echo "ripgrep: $(rg --version 2>/dev/null | head -1 || echo 'NOT FOUND')"
+echo "sqlite3: $(sqlite3 --version 2>/dev/null || echo 'NOT FOUND')"
+```
+
+All of these should be pre-installed. If any are missing, the VM image may be corrupted — inform the user.
+
+**Step 0.2 — No GitHub access. Handle accordingly:**
+
+If the user provides a GitHub URL, I explain the limitation and offer alternatives:
+
+"Cowork's VM has restricted network access — GitHub is not reachable from this environment. To analyze your codebase, please:
+1. **Share the local project directory** — In Cowork, click the folder icon to share your local clone of this repository
+2. **Or paste key files** — Share relevant source files directly in this conversation
+
+Once I have access to the files, I'll analyze the architecture, patterns, and baselines for your PRD."
+
+**Step 0.3 — RAG uses file-based analysis only:**
+
+In Cowork, there is no Docker and no PostgreSQL. All codebase analysis uses direct file operations:
+- **Glob** to discover project structure and find source files
+- **Grep** (via ripgrep) for fast full-text search across the codebase
+- **Read** to examine specific files in detail
+
+This provides excellent codebase context — equivalent to CLI mode with a local directory path. No database is needed for high-quality PRD generation.
+
+---
 
 ### Phase 1: Input Analysis & Feasibility Assessment
 
@@ -466,19 +531,92 @@ I analyze ALL available context before asking any questions:
 |------------|-----------|----------------|
 | **Requirements** | Parse title, description, constraints | Scope, complexity, domain |
 | **Local Codebase Path** | Read and analyze relevant files | Architecture, patterns, existing code, **baselines** |
-| **GitHub Repository URL** | Use `gh` CLI to fetch repository context | Relevant files, structure, dependencies, **baselines** |
-| **Mockup Images** | Analyze with Read tool (vision capability) | UI components, flows, interactions, data models |
+| **GitHub Repository URL** | Fetch repository context (method depends on environment) | Relevant files, structure, dependencies, **baselines** |
+| **Mockup Images** | Analyze from conversation (Cowork) or Read tool (CLI) | UI components, flows, interactions, data models |
 
-**GitHub Repository Fetching (MANDATORY when URL provided):**
+**Codebase Context Fetching (MANDATORY when codebase reference provided):**
 
-When user provides a GitHub URL (e.g., `https://github.com/owner/repo`), I MUST use the `gh` CLI to fetch context directly. I do NOT explore local paths when a GitHub URL is given.
+When user provides a codebase reference (GitHub URL, local path, or shared directory), I MUST fetch the codebase context. The method depends on the environment.
 
-Steps I follow:
+**Environment Detection (MANDATORY FIRST STEP):**
+
+Before fetching any codebase context, I MUST call the `check_health` MCP tool to determine the environment. The `environment` field in the response tells me which method to use:
+
+- `environment: "cli"` → Use Method 1 or Method 2 (GitHub access available)
+- `environment: "cowork"` → Use Method 3 ONLY (GitHub is BLOCKED — local files only)
+
+**Method 1 — `gh` CLI (CLI mode only):**
+
+When running locally with `gh` CLI available:
+
 1. Parse the GitHub URL to extract owner/repo
 2. Use `gh api repos/{owner}/{repo}/git/trees/main?recursive=1` to get file structure
-3. Identify relevant files based on the feature domain (e.g., auth files for auth feature)
+3. Identify relevant files based on the feature domain
 4. Use `gh api repos/{owner}/{repo}/contents/{path}` to fetch specific file contents
 5. Extract architecture patterns, existing implementations, dependencies, **and baseline metrics**
+
+**Method 2 — MCP GitHub Tools (CLI mode, when gh CLI unavailable):**
+
+When `gh` CLI is not installed but running in CLI mode (has network access):
+
+1. Parse the GitHub URL to extract owner/repo
+2. **For private repos**: Call `github_login` MCP tool FIRST → user authenticates via device flow → call `github_poll` to complete.
+3. Call `fetch_github_tree` MCP tool with the URL to get file structure
+4. Call `fetch_github_file` or `fetch_github_files_batch` MCP tool to fetch file contents
+5. Extract architecture patterns, existing implementations, dependencies, **and baseline metrics**
+
+**Method 3 — Cowork Mode (MANDATORY when environment is "cowork"):**
+
+**The Cowork VM has NO network access to GitHub and NO Docker.** Codebase analysis in Cowork relies entirely on **shared local directories** and **file-based tools** (Glob/Grep/Read).
+
+**Step 1 — Get access to the codebase:**
+
+The user MUST share their codebase as a local directory. If the user provides a GitHub URL instead of a local path, I explain the limitation:
+
+"I'm running in Cowork's sandboxed VM which doesn't have network access to GitHub. To analyze your codebase, please share the local project directory:
+- Click the **folder icon** in Cowork to share your local clone of this repository
+- Or provide the local path where you have this repo checked out"
+
+If the user has already shared a directory (visible in the conversation or via file mounts), I use that directly.
+
+**Step 2 — Analyze the shared codebase:**
+
+Once I have access to the local directory, I use standard file-based tools:
+
+- **Glob** to find source files: `**/*.swift`, `**/*.ts`, `**/*.py`, `**/*.js`, etc.
+- **Read** to examine package manifests, README, configuration, key source files
+- **Grep** (ripgrep, pre-installed in VM) to find architecture patterns, domain entities, baseline metrics
+
+I extract:
+- Architecture patterns (Repository, Service, Factory, Observer, Strategy, MVVM, Clean Architecture)
+- Domain entities, interfaces, dependency relationships
+- Baseline metrics from test assertions, monitoring code, SLA configs
+- Existing code patterns for PRD context enrichment
+
+**Step 3 — Contextual search during PRD generation:**
+
+During section generation, I search the codebase for relevant context using Grep:
+
+```bash
+# Example: find code related to authentication
+rg -l "authentication\|login\|auth" --type swift --type ts --type py /path/to/shared/repo | head -10
+```
+
+This provides the same quality of codebase context as the CLI mode RAG database — Grep on source files is fast and comprehensive.
+
+**Fallback (if no local directory available):**
+
+If the user cannot share a local directory:
+1. Ask the user to **paste relevant source files** directly in the conversation
+2. Ask the user to **describe the architecture** and existing patterns
+3. Proceed with requirements-only PRD generation (no codebase baselines)
+
+I NEVER attempt to clone from GitHub, use WebFetch on GitHub URLs, or start Docker containers in Cowork mode. I NEVER silently skip codebase analysis — I explicitly tell the user what's needed.
+
+**Mockup Image Handling:**
+
+- **Cowork**: Images shared by the user appear in the conversation as multimodal content, or in shared folders accessible via VirtioFS. I analyze them directly from the message or use the Read tool on shared file paths.
+- **CLI mode**: Use the Read tool to analyze mockup images from local file paths.
 
 **Baseline Extraction from Codebase (CRITICAL):**
 
@@ -2253,6 +2391,7 @@ echo $ANTHROPIC_API_KEY
 
 ## VERSION HISTORY
 
+- **v7.2.2**: Cowork environment rewrite — accurate Ubuntu 22.04 ARM64 VM model, no GitHub/Docker/gh assumptions, file-based codebase analysis via shared local directories, network allowlist awareness, correct pre-installed tool inventory
 - **v7.2.1**: Dual-mode MCP server — bundled Node.js server runs in both CLI and Cowork, auto-detects environment, no external install needed for Cowork
 - **v7.2.0**: MCP server (7 utility tools) + Cowork plugin support, engine installed separately at ~/.aiprd/, lightweight plugin shell for marketplace distribution (<50MB), local marketplace for dev testing
 - **v7.1.0**: 14-day trial + 3-tier license enforcement (Trial/Free/Licensed), trial.json auto-creation, free-tier PRD type restrictions, clarification round caps, strategy degradation notices
