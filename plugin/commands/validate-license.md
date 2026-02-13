@@ -31,8 +31,8 @@ Available Features:
 ```
 
 If the tier is `free`, mention:
-- A full license can be purchased at https://aiprd.dev/purchase
-- After purchase, activate with: `/ai-prd-builder:validate-license AIPRD-your-key-here`
+- A full license can be purchased at https://ai-architect.tools/purchase
+- After purchase, activate with: `/ai-prd-generator:validate-license AIPRD-your-key-here`
 
 If the tier is `trial`, show days remaining and the purchase URL.
 

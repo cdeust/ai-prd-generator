@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * AI PRD Builder — Dual-Mode MCP Server (Zero Dependencies)
+ * AI Architect PRD Generator — Dual-Mode MCP Server (Zero Dependencies)
  *
  * Runs in two modes:
  *   CLI mode  : delegates license validation to ~/.aiprd/validate-license binary
@@ -11,7 +11,7 @@
  *
  * Transport: stdio (JSON-RPC 2.0). All logging to stderr.
  *
- * PATCH v7.2.2 — Fixes:
+ * PATCH v1.0.0 — Fixes:
  *   1. github_login device flow broken by overly broad 404 handler
  *   2. Accept header override for non-API GitHub endpoints
  */
@@ -51,7 +51,7 @@ function httpsRequest(method, url, body = null, extraHeaders = {}) {
     // not for github.com/login/* (device flow needs application/json)
     const isGitHubAPI = parsed.hostname === "api.github.com";
     const headers = {
-      "User-Agent": "ai-prd-builder/7.2.2",
+      "User-Agent": "ai-prd-generator/1.0.0",
       ...(isGitHubAPI ? { Accept: "application/vnd.github.v3+json" } : {}),
       ...extraHeaders,
     };
@@ -226,7 +226,7 @@ try {
   skillConfig = JSON.parse(fs.readFileSync(SKILL_CONFIG_PATH, "utf8"));
 } catch (_) {
   process.stderr.write(
-    `[ai-prd-builder] Warning: Could not load skill-config.json from ${SKILL_CONFIG_PATH}\n`
+    `[ai-prd-generator] Warning: Could not load skill-config.json from ${SKILL_CONFIG_PATH}\n`
   );
 }
 
@@ -277,7 +277,7 @@ function _persistKey(aiprdKey) {
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(dest, blob, { mode: 0o600 });
   } catch (e) {
-    process.stderr.write(`[ai-prd-builder] Could not persist activation: ${e.message}\n`);
+    process.stderr.write(`[ai-prd-generator] Could not persist activation: ${e.message}\n`);
   }
 }
 
@@ -334,7 +334,7 @@ function validateLicense() {
         _cachedLicense = result;
         return result;
       } catch (e) {
-        process.stderr.write(`[ai-prd-builder] External validator failed: ${e.message}\n`);
+        process.stderr.write(`[ai-prd-generator] External validator failed: ${e.message}\n`);
       }
     }
   }
@@ -500,7 +500,7 @@ const TOOLS = {
       if (expiresAt <= new Date()) {
         return {
           activated: false,
-          error: `License expired on ${license.expires_at}. Visit https://aiprd.dev/purchase to renew.`,
+          error: `License expired on ${license.expires_at}. Visit https://ai-architect.tools/purchase to renew.`,
         };
       }
 
@@ -550,7 +550,7 @@ const TOOLS = {
     handler(_args) {
       return {
         version: skillConfig.version || "unknown",
-        name: skillConfig.name || "AI PRD Builder",
+        name: skillConfig.name || "AI Architect PRD Generator",
         environment: ENVIRONMENT,
         engine_home: ENGINE_HOME,
         plugin_root: PLUGIN_ROOT,
@@ -1054,8 +1054,8 @@ const TOOLS = {
 // ---------------------------------------------------------------------------
 
 const SERVER_INFO = {
-  name: "ai-prd-builder",
-  version: skillConfig.version || "7.2.2",
+  name: "ai-prd-generator",
+  version: skillConfig.version || "1.0.0",
 };
 
 function makeResponse(id, result) {
@@ -1176,12 +1176,12 @@ process.stdin.on("data", (chunk) => {
         }
       }).catch((e) => {
         process.stderr.write(
-          `[ai-prd-builder] Handler error: ${e.message}\n`
+          `[ai-prd-generator] Handler error: ${e.message}\n`
         );
       });
     } catch (e) {
       process.stderr.write(
-        `[ai-prd-builder] Failed to parse message: ${e.message}\n`
+        `[ai-prd-generator] Failed to parse message: ${e.message}\n`
       );
     }
   }
@@ -1191,5 +1191,5 @@ process.on("SIGTERM", () => process.exit(0));
 process.on("SIGINT", () => process.exit(0));
 
 process.stderr.write(
-  `[ai-prd-builder] MCP server started (${ENVIRONMENT} mode, v7.2.2)\n`
+  `[ai-prd-generator] MCP server started (${ENVIRONMENT} mode, v1.0.0)\n`
 );

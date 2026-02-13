@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "ai-prd-builder": {
+    "ai-prd-generator": {
       "command": "node",
       "args": ["plugin/mcp-server/index.js"],
       "env": {
