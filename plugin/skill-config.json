@@ -1,6 +1,6 @@
 {
-  "version": "7.2.0",
-  "name": "AI Architect PRD Builder",
+  "version": "1.0.0",
+  "name": "AI Architect PRD Generator",
   "description": "Enterprise PRD generation with VisionEngine (Apple Foundation Models, 180+ components), Business KPIs (8 metric systems), 8 context-aware PRD types, real-time LLM streaming, license-aware tiered architecture (trial/free/licensed), 15 RAG-enhanced thinking strategies, research-based prioritization, MCP server with 7 utility tools, and Cowork plugin support",
   "license": {
     "tiers": ["trial", "free", "licensed"],
@@ -24,7 +24,7 @@
       "duration_days": 14,
       "storage_path": "~/.aiprd/trial.json",
       "features": "licensed",
-      "purchase_url": "https://aiprd.dev/purchase",
+      "purchase_url": "https://ai-architect.tools/purchase",
       "security": "HMAC-SHA256 keyed from hardware fingerprint"
     },
     "free_tier": {
@@ -470,8 +470,8 @@
     }
   },
   "plugin": {
-    "name": "ai-prd-builder",
-    "version": "7.2.0",
+    "name": "ai-prd-generator",
+    "version": "1.0.0",
     "engine_home": "~/.aiprd",
     "install_command": "make install-engine",
     "mcp_server": {

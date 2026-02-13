@@ -23,7 +23,7 @@ Development was conducted exclusively outside of any employment obligations, usi
 
 | Date | Milestone |
 |------|-----------|
-| **September 2025** | Initial proof-of-concept ([ai-prd-builder](https://github.com/cdeust/ai-prd-builder)). First commit: September 11, 2025, 23:16 UTC. |
+| **September 2025** | Initial proof-of-concept ([ai-prd-generator](https://github.com/cdeust/ai-prd-generator)). First commit: September 11, 2025, 23:16 UTC. |
 | **October 2025** | Structured development begins ([ai-prd](https://github.com/cdeust/ai-prd)). Clean architecture implementation, SOLID principles, Zero Tolerance rules. First commit: October 5, 2025, 17:36 CET. |
 | **October - December 2025** | Core feature development: RAG engine (hybrid vector/text search), Vision engine (mockup interpretation), Chain of Verification (multi-LLM validation). |
 | **January 2026** | Packaging as Anthropic Skill ([ai-prd-generator](https://github.com/cdeust/ai-prd-generator)). Internal testing with positive feedback. Landing page and pilot program launch. |

@@ -1,8 +1,24 @@
 {
-  "name": "ai-prd-builder",
-  "description": "Enterprise PRD generation with 8 engines, license-aware tiers, 15 thinking strategies, 8 PRD types, and production-ready specs",
-  "version": "7.2.1",
+  "name": "ai-prd-generator",
+  "description": "Enterprise PRD generator with 8 PRD types, 15 thinking strategies, multi-judge verification, codebase analysis, and 4-file export (PRD + JIRA + Tests + Verification)",
+  "version": "1.0.0",
   "author": {
-    "name": "AI PRD Builder"
-  }
+    "name": "Clement Deust",
+    "email": "admin@ai-architect.tools",
+    "url": "https://ai-architect.tools"
+  },
+  "homepage": "https://ai-architect.tools",
+  "repository": "https://github.com/cdeust/ai-prd-generator",
+  "license": "Commercial",
+  "keywords": [
+    "prd",
+    "product-requirements",
+    "documentation",
+    "enterprise",
+    "verification",
+    "jira",
+    "testing",
+    "ai-reasoning",
+    "codebase-analysis"
+  ]
 }

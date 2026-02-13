@@ -1,6 +1,6 @@
 ---
 name: ai-prd-generator
-version: 7.2.0
+version: 1.0.0
 description: Enterprise PRD generation with VisionEngine (Apple Foundation Models, 180+ components), Business KPIs (8 metric systems), context-aware depth (8 PRD types), license-aware tiered architecture, 15 RAG-enhanced thinking strategies, research-based prioritization, MCP server with 7 utility tools, Cowork plugin support, and production-ready technical specifications
 dependencies: node>=18
 default_providers: claude_code_session, apple_intelligence
@@ -10,11 +10,11 @@ prd_contexts: proposal, feature, bug, incident, poc, mvp, release, cicd
 vision_platforms: apple, android, java_enterprise, web
 engines: shared_utilities, rag, verification, meta_prompting, strategy, vision, orchestration, encryption
 mcp_tools: validate_license, get_license_features, get_config, read_skill_config, check_health, get_prd_context_info, list_available_strategies
-plugin: ai-prd-builder
+plugin: ai-prd-generator
 engine_home: ${CLAUDE_PLUGIN_ROOT} (Cowork) or ~/.aiprd (CLI)
 ---
 
-# AI PRD Generator - Enterprise Edition (v7.2.0)
+# AI Architect PRD Generator - Enterprise Edition (v1.0.0)
 
 I generate **production-ready** Product Requirements Documents with 8 independent engines: orchestration pipeline, encryption/PII protection, multi-LLM verification, and advanced reasoning strategies at every step.
 
@@ -74,7 +74,7 @@ I MUST call the `validate_license` MCP tool, which handles validation automatica
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   AI PRD Generator — TRIAL (X days remaining)
   Full access — all features unlocked
-  Purchase: https://aiprd.dev/purchase
+  Purchase: https://ai-architect.tools/purchase
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
@@ -83,7 +83,7 @@ I MUST call the `validate_license` MCP tool, which handles validation automatica
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   AI PRD Generator — FREE TIER
   2 strategies | 3 clarification rounds | feature/bug PRDs only
-  Upgrade: https://aiprd.dev/purchase
+  Upgrade: https://ai-architect.tools/purchase
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
@@ -208,7 +208,7 @@ If "Focused Epic PRD" → AskUserQuestion to select epic → Generate implementa
 **FREE tier cap:** In FREE mode, clarification is limited to **3 rounds**. After round 3, I auto-proceed with a notice:
 ```
 ⚠️ Free tier: 3 clarification rounds reached — proceeding with gathered context.
-For unlimited clarification rounds, upgrade: https://aiprd.dev/purchase
+For unlimited clarification rounds, upgrade: https://ai-architect.tools/purchase
 ```
 LICENSED and TRIAL tiers have no round limit.
 
@@ -244,7 +244,7 @@ LICENSED and TRIAL tiers have no round limit.
 ```
 ⚠️ Free tier: "{requested_type}" PRDs require a license.
 Available free types: feature, bug
-Upgrade for all 8 PRD types: https://aiprd.dev/purchase
+Upgrade for all 8 PRD types: https://ai-architect.tools/purchase
 ```
 Then I offer `feature` as the fallback via AskUserQuestion. LICENSED and TRIAL tiers have access to all 8 types.
 
@@ -2055,7 +2055,7 @@ All advanced strategies gracefully degrade to `chain_of_thought` for free users.
 When degradation occurs, I display:
 ```
 ℹ️ Strategy "{requested}" requires a license — using chain_of_thought instead.
-Upgrade for all 15 strategies: https://aiprd.dev/purchase
+Upgrade for all 15 strategies: https://ai-architect.tools/purchase
 ```
 
 ---
@@ -2253,8 +2253,7 @@ echo $ANTHROPIC_API_KEY
 
 ## VERSION HISTORY
 
-- **v7.2.1**: Dual-mode MCP server — bundled Node.js server runs in both CLI and Cowork, auto-detects environment, no external install needed for Cowork
-- **v7.2.0**: MCP server (7 utility tools) + Cowork plugin support, engine installed separately at ~/.aiprd/, lightweight plugin shell for marketplace distribution (<50MB), local marketplace for dev testing
+- **v1.0.0**: Unified release — Dual-mode MCP server (CLI + Cowork), 7 utility tools, Ed25519 license signing with AES-256 encrypted persistence, marketplace-ready plugin, unified naming as AI Architect PRD Generator
 - **v7.1.0**: 14-day trial + 3-tier license enforcement (Trial/Free/Licensed), trial.json auto-creation, free-tier PRD type restrictions, clarification round caps, strategy degradation notices
 - **v7.0.0**: Phase 7 complete - Vision Engine + Business KPIs (8 metric systems) with documented baselines
 - **v6.0.0**: Business KPIs research, Video-RAG research, DeepSeek-OCR research
@@ -2288,4 +2287,4 @@ echo $ANTHROPIC_API_KEY
 - Free tier (post-trial): Basic strategies (zero_shot, chain_of_thought), 3 clarification rounds max, basic verification, feature/bug PRDs only
 - Licensed tier: All 15 RAG-enhanced strategies with research-based prioritization, unlimited clarification, full verification engine, context-aware depth adaptation
 
-**Purchase:** https://aiprd.dev/purchase
+**Purchase:** https://ai-architect.tools/purchase

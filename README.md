@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="docs/assets/hero-cowork.png" alt="AI PRD Generator running in Cowork" width="720" />
+  <img src="docs/assets/mockup-hero.png" alt="AI Architect PRD Generator — Production-ready PRDs in minutes" width="900" />
 </p>
 
-<h1 align="center">AI PRD Generator</h1>
+<h1 align="center">AI Architect PRD Generator</h1>
 
 <p align="center">
   <strong>Turn feature requests into production-ready specs in minutes, not days.</strong>
@@ -26,7 +26,7 @@
 
 ---
 
-AI PRD Generator is a plugin for **Claude Code** and **Cowork** that produces implementation-ready PRDs with SQL DDL, domain models, API specs, JIRA tickets, and test cases — all verified by multi-LLM consensus before delivery.
+AI Architect PRD Generator is a plugin for **Claude Code** and **Cowork** that produces implementation-ready PRDs with SQL DDL, domain models, API specs, JIRA tickets, and test cases — all verified by multi-LLM consensus before delivery.
 
 Describe what you want to build. Get back a complete PRD with sprint-ready tickets.
 
@@ -38,7 +38,7 @@ Writing PRDs manually takes **4-8 hours** per document. Generic AI tools produce
 
 ## The Solution
 
-AI PRD Generator combines **8 specialized AI engines** to produce PRDs that are ready for implementation — not just high-level descriptions, but concrete specifications with:
+AI Architect PRD Generator combines **8 specialized AI engines** to produce PRDs that are ready for implementation — not just high-level descriptions, but concrete specifications with:
 
 - Exact SQL DDL with constraints, indexes, and RLS policies
 - Domain models with validation rules and error types
@@ -59,7 +59,7 @@ The fastest path. Works in Anthropic's cloud environment with zero local setup.
 
 ```bash
 # From the Cowork marketplace
-claude plugin install ai-prd-builder
+claude plugin install ai-prd-generator
 ```
 
 The plugin bundles its own MCP server (Node.js, zero dependencies). No Swift toolchain required. License validation works in both cloud and local modes.
@@ -92,6 +92,12 @@ export ANTHROPIC_API_KEY="sk-ant-..."
 ---
 
 ## How It Works
+
+<p align="center">
+  <img src="docs/assets/mockup-clarification.png" alt="Interactive clarification in Cowork — scope detection, context-aware questions" width="900" />
+</p>
+
+The system asks targeted questions informed by your codebase and mockups before writing a single line. Scope assessment, epic selection, and multi-round clarification — all interactive.
 
 ```mermaid
 flowchart TD
@@ -129,6 +135,71 @@ flowchart TD
 5. **Generate** — Produces each section with research-backed strategies, one at a time so you can refine
 6. **Verify** — Multi-judge consensus catches contradictions, orphan requirements, and specification gaps
 7. **Deliver** — Exports 4 files: PRD, JIRA tickets, test cases, and a full verification audit trail
+
+---
+
+## What You Get
+
+<p align="center">
+  <img src="docs/assets/mockup-deliverables.png" alt="One input, four deliverables — PRD, JIRA tickets, test cases, verification report" width="900" />
+</p>
+
+Every PRD generation produces **4 files**:
+
+### 1. PRD Document (`PRD-{Name}.md`)
+
+Full implementation spec with:
+- Overview, goals with measurable baselines and targets
+- Functional and non-functional requirements (numbered, prioritized)
+- User stories with GIVEN-WHEN-THEN acceptance criteria
+- SQL DDL (tables, indexes, RLS, materialized views)
+- Domain models with validation and error types
+- REST API specification with rate limits
+- Implementation roadmap with story points per phase
+
+### 2. JIRA Tickets (`PRD-{Name}-jira.md`)
+
+Sprint-ready backlog:
+- Epics with story breakdowns
+- Fibonacci story points (no ticket > 13 SP)
+- Task-level breakdowns per story
+- Dependencies mapped
+- CSV export for direct JIRA import
+
+### 3. Test Cases (`PRD-{Name}-tests.md`)
+
+QA-ready test suite:
+- Unit, integration, and E2E test cases
+- Each acceptance criterion mapped to specific tests
+- Full traceability matrix (no orphan ACs)
+- Test data requirements
+
+### 4. Verification Report (`PRD-{Name}-verification.md`)
+
+Audit trail:
+- Section-by-section quality scores
+- Every claim verified with algorithm + strategy used
+- Assumption and risk log with owners
+- Completeness check (all items logged)
+
+---
+
+## Verification
+
+<p align="center">
+  <img src="docs/assets/mockup-verification.png" alt="Every claim verified, every requirement traced — 6 algorithms, 15 strategies" width="900" />
+</p>
+
+Every claim in every PRD is verified using 6 verification algorithms and 15 reasoning strategies. The verification report includes baselines, deltas, and measurement methods — not just pass/fail.
+
+| Algorithm | What It Does |
+|-----------|-------------|
+| **KS Adaptive Consensus** | Stops early when judges agree, saving 30-50% LLM calls |
+| **Zero-LLM Graph** | Finds orphan requirements and circular dependencies for free |
+| **Multi-Agent Debate** | Resolves disputed claims through structured argumentation |
+| **Complexity-Aware Routing** | Right-sizes verification depth to claim complexity |
+| **Atomic Decomposition** | Splits vague claims into independently verifiable atoms |
+| **Unified Pipeline** | Orchestrates all algorithms with automatic routing |
 
 ---
 
@@ -204,48 +275,6 @@ Plus 4 Chinese vision providers (DeepSeek, Qwen, Zhipu, MiniMax) for mockup anal
 
 ---
 
-## What You Get
-
-Every PRD generation produces **4 files**:
-
-### 1. PRD Document (`PRD-{Name}.md`)
-
-Full implementation spec with:
-- Overview, goals with measurable baselines and targets
-- Functional and non-functional requirements (numbered, prioritized)
-- User stories with GIVEN-WHEN-THEN acceptance criteria
-- SQL DDL (tables, indexes, RLS, materialized views)
-- Domain models with validation and error types
-- REST API specification with rate limits
-- Implementation roadmap with story points per phase
-
-### 2. JIRA Tickets (`PRD-{Name}-jira.md`)
-
-Sprint-ready backlog:
-- Epics with story breakdowns
-- Fibonacci story points (no ticket > 13 SP)
-- Task-level breakdowns per story
-- Dependencies mapped
-- CSV export for direct JIRA import
-
-### 3. Test Cases (`PRD-{Name}-tests.md`)
-
-QA-ready test suite:
-- Unit, integration, and E2E test cases
-- Each acceptance criterion mapped to specific tests
-- Full traceability matrix (no orphan ACs)
-- Test data requirements
-
-### 4. Verification Report (`PRD-{Name}-verification.md`)
-
-Audit trail:
-- Section-by-section quality scores
-- Every claim verified with algorithm + strategy used
-- Assumption and risk log with owners
-- Completeness check (all items logged)
-
----
-
 ## Usage
 
 In Claude Code or Cowork, just describe what you want:
@@ -316,7 +345,7 @@ Start free. Upgrade when you need the full engine.
 </p>
 
 <p align="center">
-  <a href="https://aiprd.dev/purchase"><strong>Get Licensed &rarr;</strong></a>
+  <a href="https://ai-architect.tools/purchase"><strong>Get Licensed &rarr;</strong></a>
 </p>
 
 ---
@@ -362,7 +391,7 @@ Start free. Upgrade when you need the full engine.
 
 Free tier available without a license key. Licensed tier requires a valid, hardware-bound license for full feature access.
 
-For questions: **support@aiprd.dev**
+For questions: **admin@ai-architect.tools**
 
 ---
 

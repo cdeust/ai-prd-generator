@@ -61,3 +61,4 @@ frameworks/*.xcframework
 # These are extracted to packages/ from encrypted .source-package archives
 packages/AIPRDVisionEngine/
 packages/AIPRDVisionEngineApple/
+node_modules/
