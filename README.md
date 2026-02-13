@@ -379,8 +379,8 @@ Start free. Upgrade when you need the full engine.
 |----------|-------------|
 | [SKILL.md](SKILL.md) | Full workflow documentation and configuration |
 | [CHANGELOG.md](CHANGELOG.md) | Version history and release notes |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | Contribution guidelines |
 | [LICENSE](LICENSE) | Commercial license terms |
+| [LEGAL.md](LEGAL.md) | IP ownership and cryptographic proof of origin |
 | [examples/](examples/) | Usage examples with sample output |
 
 ---
