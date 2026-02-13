@@ -2392,19 +2392,6 @@ echo $ANTHROPIC_API_KEY
 ## VERSION HISTORY
 
 - **v1.0.0**: Licensed distribution — dual-mode MCP server (CLI + Cowork), Ed25519 license validation, encrypted engine packages, 8 PRD types, 15 thinking strategies, multi-judge verification, 4-file export
-- **v7.1.0**: 14-day trial + 3-tier license enforcement (Trial/Free/Licensed), trial.json auto-creation, free-tier PRD type restrictions, clarification round caps, strategy degradation notices
-- **v7.0.0**: Phase 7 complete - Vision Engine + Business KPIs (8 metric systems) with documented baselines
-- **v6.0.0**: Business KPIs research, Video-RAG research, DeepSeek-OCR research
-- **v5.0.0**: VisionEngine (Apple Foundation Models, 180+ components, multi-provider)
-- **v4.5.0**: Complete 8-type PRD context system (added CI/CD) - final template set for BAs and PMs
-- **v4.4.0**: Extended context-aware PRD generation to 7 types (added poc/mvp/release) with context-specific sections, clarification questions, RAG focus, and strategy selection
-- **v4.3.0**: Context-aware PRD generation (proposal/feature/bug/incident) with adaptive depth, context-specific sections, and RAG depth optimization
-- **v4.2.0**: Real-time LLM streaming across all 15 thinking strategies with automatic fallback
-- **v4.1.0**: License-aware tiered architecture + RAG integration for all 15 strategies + Research-based prioritization (MIT/Stanford/Harvard/Anthropic/OpenAI/DeepSeek)
-- **v4.0.0**: Meta-Prompting Engine with 15 strategies + 6 cross-enhancement innovations + 30+ KPIs
-- **v3.0.0**: Enterprise output + 6 verification algorithms
-- **v2.0.0**: Contextual BM25 RAG (+49% precision)
-- **v1.0.0**: Foundation
 
 ---
 
