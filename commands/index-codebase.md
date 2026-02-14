@@ -25,7 +25,7 @@ Use the Read tool to read the file `~/.aiprd/license-key`.
 
 Call `check_health` MCP tool. Note the `environment` field:
 - `environment: "cli"` → Local directory access. Use `$ARGUMENTS` as the target path.
-- `environment: "cowork"` → No local filesystem access to user's code. If `$ARGUMENTS` is a GitHub URL, use WebFetch to retrieve the repo structure. Otherwise, ask the user to paste relevant code or provide a GitHub URL.
+- `environment: "cowork"` → The plugin analyzes codebases from **locally shared directories**. If the user has shared a project folder, use Glob/Grep/Read to index it directly. If no directory is shared and `$ARGUMENTS` is a GitHub URL, try WebFetch as a fallback (may time out). If neither works, ask the user to share the project directory with the Cowork session.
 
 Then call `validate_license` MCP tool.
 
@@ -49,12 +49,13 @@ For GitHub repositories:
 
 ## Cowork Mode
 
-Since there is no local filesystem access to the user's codebase:
+The plugin analyzes codebases from **locally shared directories** in Cowork. This is the primary and most reliable method.
 
-1. If `$ARGUMENTS` is a GitHub URL, use **WebFetch** to retrieve the repo structure, README, and key files
-2. If `$ARGUMENTS` is text, treat it as a project description and ask the user to paste key source files
-3. Extract patterns and entities from the provided context
-4. Summarize the codebase structure for RAG context
+1. **Shared directory (PRIMARY):** If the user has shared a project folder, use Glob/Grep/Read to scan and index it — same workflow as CLI mode
+2. **WebFetch fallback:** If no local directory is shared and `$ARGUMENTS` is a public GitHub URL, try WebFetch to retrieve the repo structure, README, and key files (may time out)
+3. **Ask the user:** If neither method works, ask the user to share the project directory with the Cowork session, or paste key source files
+4. Extract patterns and entities from the provided context
+5. Summarize the codebase structure for RAG context
 
 Store the indexed context so subsequent PRD generation can reference it for:
 - Architecture-aware technical specifications

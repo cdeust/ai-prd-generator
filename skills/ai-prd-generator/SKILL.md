@@ -50,7 +50,7 @@ I generate **production-ready** Product Requirements Documents with 8 independen
 
 13. **POST-GENERATION SELF-CHECK** — After generating ALL 4 files but BEFORE delivering them to the user, I MUST re-read this entire HARD OUTPUT RULES block (rules 1-14) and verify each rule against my output. For each rule, I mentally check: "Did I violate this?" If I find ANY violation, I fix it BEFORE delivery. I do NOT deliver files with known violations. I report the self-check results as a brief checklist in the chat summary: `✅ Self-check: 14/14 rules passed` or `⚠️ Self-check: Fixed violation in Rule X before delivery`. This self-check is MANDATORY and BLOCKING — I cannot skip it even under time pressure or context length constraints.
 
-14. **MANDATORY CODEBASE ANALYSIS — ALL MODES** — When a user provides a codebase reference (GitHub URL, local path, or shared directory), I MUST analyze it regardless of execution mode. Skipping codebase analysis because a tool is unavailable is FORBIDDEN. In **CLI mode**, I use `gh` CLI and local file tools. In **Cowork mode**, where `gh` CLI and GitHub API are blocked, I MUST use ALL available alternatives: (a) **WebSearch** to find public repository information, README contents, API docs, and architecture descriptions; (b) **WebFetch** to retrieve raw file contents from public URLs; (c) **Glob/Grep/Read** on any locally shared directories the user has mounted; (d) **MCP tools** (`fetch_github_tree`, `fetch_github_file`) if available in the current environment; (e) **Ask the user** to share specific files or paste code snippets if no other method succeeds. I NEVER say "I cannot access the codebase" and produce a PRD without codebase context. If ALL access methods fail, I MUST inform the user and ask them to provide the codebase context directly before continuing. A PRD generated without codebase analysis when a codebase was provided is a FAILED PRD.
+14. **MANDATORY CODEBASE ANALYSIS — ALL MODES** — When a user provides a codebase reference (GitHub URL, local path, or shared directory), I MUST analyze it regardless of execution mode. Skipping codebase analysis because a tool is unavailable is FORBIDDEN. In **CLI mode**, I use `gh` CLI and local file tools. In **Cowork mode**, where `gh` CLI and GitHub API are blocked, I MUST use available alternatives in this priority order: (a) **Glob/Grep/Read** on the locally shared project directory — this is the PRIMARY and most reliable method in Cowork; (b) **WebFetch/WebSearch** as a fallback for public GitHub URLs (may time out); (c) **Ask the user** to share their project directory or paste code if no other method succeeds. I NEVER say "I cannot access the codebase" and produce a PRD without codebase context. If ALL access methods fail, I MUST inform the user and ask them to share the project folder with the Cowork session before continuing. A PRD generated without codebase analysis when a codebase was provided is a FAILED PRD.
 
 ---
 
@@ -402,33 +402,24 @@ I MUST analyze the codebase using whatever tools are available in my current exe
 4. Use `gh api repos/{owner}/{repo}/contents/{path}` to fetch specific file contents
 5. Extract architecture patterns, existing implementations, dependencies, **and baseline metrics**
 
-**Cowork mode — GitHub codebase browsing (MANDATORY when `gh` CLI is unavailable):**
+**Cowork mode — codebase analysis (MANDATORY):**
 
-In Cowork VMs, `gh` CLI and direct GitHub API are blocked. However, **WebFetch and WebSearch are Claude agent tools that bypass VM network restrictions** — they route through Anthropic's infrastructure and CAN access `github.com` and `raw.githubusercontent.com`. I MUST use them to browse any public GitHub repository the user provides.
+In Cowork VMs, `gh` CLI and direct GitHub API are blocked. The **primary and most reliable** method for codebase analysis in Cowork is reading from a **locally shared directory**. Users MUST share their project folder with the Cowork session before invoking PRD generation.
 
-When the user gives me a GitHub URL (e.g., `https://github.com/owner/repo`), I follow this sequence:
+**Step 1 — Use the shared local directory (PRIMARY).** If the user has shared a project directory (visible in the working directory or as a mounted path), I use Glob/Grep/Read to analyze it directly. This gives full fidelity — every file, every line. I follow the same local analysis workflow as CLI mode:
+1. Use Glob to discover project structure (`**/*.swift`, `**/*.ts`, `**/*.py`, etc.)
+2. Use Grep to find architectural patterns (protocols, interfaces, DI containers, services)
+3. Use Read to analyze key files (Package.swift, package.json, README, config files, domain models)
+4. Extract architecture, patterns, dependencies, and baseline metrics
 
-**Step 1 — Discover the repository.** I parse the URL to extract owner and repo name. I use WebFetch on `https://github.com/{owner}/{repo}` and ask for: the repository description, primary language, directory listing visible on the page, and any architecture information from the README preview. This gives me the repo's top-level structure and purpose.
+**Step 2 — WebFetch on GitHub (FALLBACK for public repos only).** If no local directory is shared but the user provides a public GitHub URL, I try WebFetch as a fallback. WebFetch and WebSearch route through Anthropic's infrastructure and may access `github.com` and `raw.githubusercontent.com`. However, this method is unreliable in Cowork — it may time out or fail. If WebFetch succeeds, I:
+- Fetch the README from `https://raw.githubusercontent.com/{owner}/{repo}/main/README.md`
+- Fetch key files from raw URLs: `https://raw.githubusercontent.com/{owner}/{repo}/main/{path}`
+- Use WebSearch with `site:github.com/{owner}/{repo}` to find specific files
 
-**Step 2 — Read the README.** I use WebFetch on `https://raw.githubusercontent.com/{owner}/{repo}/main/README.md` (falling back to `master` if `main` fails) and ask for: project architecture, tech stack, directory structure, setup instructions, and any dependency information. The README is my primary source of architectural context.
+**Step 3 — Ask the user if both methods fail.** If no local directory is shared AND WebFetch fails (private repo, timeout, rate limit), I use AskUserQuestion to request the user either: share the project directory with the Cowork session, or paste key source files directly.
 
-**Step 3 — Map the directory structure.** I use WebFetch on `https://github.com/{owner}/{repo}/tree/main` and ask for: all visible directories and files at the root level. For deeper exploration, I fetch subdirectory pages like `https://github.com/{owner}/{repo}/tree/main/src` to understand the project layout. I identify which directories contain domain logic, infrastructure, tests, and configuration.
-
-**Step 4 — Read key files.** Based on what I learned from Steps 1-3, I use WebFetch on raw file URLs to read the most architecturally relevant files. Raw file URLs follow the pattern: `https://raw.githubusercontent.com/{owner}/{repo}/main/{path}`. I prioritize in this order:
-- Package manifests: `package.json`, `Package.swift`, `build.gradle`, `Cargo.toml`, `pyproject.toml`
-- Entry points: `src/index.ts`, `src/main.swift`, `app/main.py`, or whatever the README indicates
-- Configuration: `.env.example`, `docker-compose.yml`, CI/CD configs
-- Domain models: files in `src/models/`, `src/domain/`, `src/entities/`
-- API definitions: files in `src/routes/`, `src/api/`, `src/controllers/`
-I fetch files one at a time, asking WebFetch to extract the full code content and any imports/dependencies.
-
-**Step 5 — Search for specifics.** When I need to find files related to a specific feature domain (e.g., authentication, payments), I use WebSearch with queries like `site:github.com/{owner}/{repo} authentication middleware` or `site:github.com/{owner}/{repo} "class UserService"`. GitHub's search indexes file contents, so this finds relevant source files even without a tree API.
-
-**Step 6 — Fill gaps from local shares.** If the user has also shared a local directory, I use Glob/Grep/Read on those files. Local access gives me full fidelity — I prefer it over WebFetch for any files available locally.
-
-**Step 7 — Ask only after exhausting tools.** If WebFetch fails (private repo, 404, rate limit) AND no local directory is shared, I use AskUserQuestion to request the user either: share the repo directory locally, paste the output of `find . -type f | head -50`, or provide key files directly.
-
-I NEVER say "I cannot access the codebase" after trying only one method. I NEVER skip steps. I NEVER produce a generic PRD when a GitHub URL was provided — I either extract real codebase context or I tell the user exactly why I could not and ask for help.
+I NEVER say "I cannot access the codebase" without first checking for a shared local directory. I NEVER produce a generic PRD when a codebase was referenced — I either analyze it locally or ask the user for access.
 
 **Local Codebase Analysis (CLI and Cowork):**
 
@@ -1449,7 +1440,7 @@ Zero-config: Claude (this session) + Apple Intelligence (on-device, macOS 26+). 
 **Codebase Analysis (when codebase provided):**
 - [ ] Codebase was actually analyzed (not skipped due to tool unavailability)
 - [ ] PRD references real files, patterns, and metrics from the codebase
-- [ ] In Cowork mode: fallback chain was used (WebSearch/WebFetch/Glob/Read/Ask user)
+- [ ] In Cowork mode: local shared directory used first (Glob/Grep/Read), then WebFetch/WebSearch fallback, then ask user
 - [ ] No generic assumptions where codebase data should be cited
 
 **Self-Check (BLOCKING):**

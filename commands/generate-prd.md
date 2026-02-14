@@ -24,7 +24,7 @@ Use the Read tool to read the file `~/.aiprd/license-key`.
 **Cowork mode:**
 
 Call `check_health` MCP tool. Note the `environment` field:
-- `environment: "cowork"` → No direct network access. Do NOT use MCP GitHub tools. Use WebFetch, WebSearch, or ask the user to paste code.
+- `environment: "cowork"` → The plugin analyzes your codebase from **locally shared directories** using Glob, Grep, and Read tools. GitHub API and `gh` CLI are blocked. If no project folder is shared, ask the user to share one before proceeding with codebase analysis. WebFetch on public GitHub URLs is available as a fallback but may time out.
 - `environment: "cli"` → Full access. Use `gh` CLI or MCP GitHub tools for repo analysis.
 
 Then call `validate_license` MCP tool.
