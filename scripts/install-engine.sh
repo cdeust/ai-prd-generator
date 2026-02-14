@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
-# install-engine.sh — Install the AI PRD Builder engine to ~/.aiprd/
+# install-engine.sh — Install the AI PRD Builder engine config to ~/.aiprd/
 #
 # Installs:
-#   ~/.aiprd/validate-license    (compiled Swift binary for CLI crypto validation)
 #   ~/.aiprd/skill-config.json   (config for standalone use)
 #
-# The plugin bundles its own Node.js MCP server (zero deps).
-# This script only installs the CLI-mode crypto validator for
-# full Ed25519 + HMAC + hardware-fingerprint license validation.
+# The plugin bundles its own Node.js MCP server (zero deps) which handles
+# all license validation (Ed25519 + AES-256 encrypted persistence).
+# The MCP launcher (~/.aiprd/run-mcp.sh) is created by setup.sh.
 #
 # Usage:
 #   ./scripts/install-engine.sh       # from repo root
@@ -37,16 +36,13 @@ echo ""
 echo "=== Engine Install Complete ==="
 echo ""
 echo "Installed to: $ENGINE_HOME"
-if [ -f "$ENGINE_HOME/validate-license" ]; then
-    echo "  $ENGINE_HOME/validate-license (crypto validator)"
-else
-    echo "  NOTE: validate-license binary not found."
-    echo "  Run 'make build-validator' to compile it (requires Swift toolchain)."
+if [ -f "$ENGINE_HOME/run-mcp.sh" ]; then
+    echo "  $ENGINE_HOME/run-mcp.sh (MCP engine launcher)"
 fi
 if [ -f "$ENGINE_HOME/skill-config.json" ]; then
     echo "  $ENGINE_HOME/skill-config.json"
 fi
 echo ""
-echo "The plugin's bundled Node.js MCP server handles everything else."
-echo "Next: make setup-plugin && make install-plugin"
+echo "The plugin's bundled Node.js MCP server handles all license validation."
+echo "Next: ./scripts/setup.sh"
 echo ""
