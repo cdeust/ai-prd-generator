@@ -21,10 +21,9 @@ echo ""
 if [ ! -f "$LICENSE_PATH" ]; then
     echo "❌ License not found at: $LICENSE_PATH"
     echo ""
-    echo "   To set up your license:"
-    echo "   1. Run: swiftc -o /tmp/generate-keypair scripts/generate-keypair.swift"
-    echo "   2. Run: swiftc -o /tmp/generate-license scripts/generate-license.swift -framework IOKit"
-    echo "   3. Run: /tmp/generate-license"
+    echo "   A valid license is required to decrypt the engine frameworks."
+    echo "   Purchase a license at https://ai-architect.tools"
+    echo "   Then activate it with the CLI plugin's /activate-license command."
     echo ""
     exit 1
 fi

@@ -24,7 +24,7 @@ import IOKit
 
 /// Ed25519 public key for verifying license signatures
 /// Replaced at build time by `scripts/distribution/inject-public-key.sh`
-let publicKeyBase64 = "SEWbJLQAKrNKkm4N3l5sIEPv7KHTQFEIZJ1fU7+pdd8="
+let publicKeyBase64 = "3LxerokXS6xO+Ksu5AXnz95tOauoG60PSFvEOCUX0r8="
 
 let licensePrimaryPath = FileManager.default.homeDirectoryForCurrentUser
     .appendingPathComponent(".aiprd/license.json")
