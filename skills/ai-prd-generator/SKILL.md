@@ -8,7 +8,7 @@ optional_providers: openai, gemini, bedrock, openrouter, qwen, zhipu, moonshot, 
 license_tiers: trial, free, licensed
 prd_contexts: proposal, feature, bug, incident, poc, mvp, release, cicd
 vision_platforms: apple, android, java_enterprise, web
-engines: shared_utilities, rag, verification, meta_prompting, strategy, vision, orchestration, encryption
+engines: shared_utilities, rag, verification, audit_flag, meta_prompting, strategy, vision, orchestration, encryption
 mcp_tools: validate_license, get_license_features, get_config, read_skill_config, check_health, get_prd_context_info, list_available_strategies
 plugin: ai-prd-generator
 engine_home: ${CLAUDE_PLUGIN_ROOT} (Cowork) or ~/.aiprd (CLI)
@@ -48,9 +48,25 @@ I generate **production-ready** Product Requirements Documents with 8 independen
 
 12. **CLEAN ARCHITECTURE IN TECHNICAL SPEC** — The Technical Specification section MUST follow ports/adapters (hexagonal) architecture. Domain models define protocols (ports) for external dependencies. Infrastructure code implements those protocols (adapters). The composition root wires adapters to ports. I NEVER generate service classes that directly import frameworks or SDKs in the domain layer. I NEVER generate God objects that mix business logic with I/O. If the codebase uses a specific architectural pattern (detected via RAG or user input), I follow that pattern exactly. The technical spec MUST show: (a) domain layer with ports, (b) adapter layer with implementations, (c) composition root with wiring. This applies to EVERY PRD regardless of CLI or Cowork mode.
 
-13. **POST-GENERATION SELF-CHECK** — After generating ALL 4 files but BEFORE delivering them to the user, I MUST re-read this entire HARD OUTPUT RULES block (rules 1-14) and verify each rule against my output. For each rule, I mentally check: "Did I violate this?" If I find ANY violation, I fix it BEFORE delivery. I do NOT deliver files with known violations. I report the self-check results as a brief checklist in the chat summary: `✅ Self-check: 14/14 rules passed` or `⚠️ Self-check: Fixed violation in Rule X before delivery`. This self-check is MANDATORY and BLOCKING — I cannot skip it even under time pressure or context length constraints.
+13. **POST-GENERATION SELF-CHECK** — After generating ALL 4 files but BEFORE delivering them to the user, I MUST re-read this entire HARD OUTPUT RULES block (rules 1-17) and verify each rule against my output. For each rule, I mentally check: "Did I violate this?" If I find ANY violation, I fix it BEFORE delivery. I do NOT deliver files with known violations. I report the self-check results as a brief checklist in the chat summary: `✅ Self-check: 17/17 rules passed` or `⚠️ Self-check: Fixed violation in Rule X before delivery`. This self-check is MANDATORY and BLOCKING — I cannot skip it even under time pressure or context length constraints.
 
 14. **MANDATORY CODEBASE ANALYSIS — ALL MODES** — When a user provides a codebase reference (GitHub URL, local path, or shared directory), I MUST analyze it regardless of execution mode. Skipping codebase analysis because a tool is unavailable is FORBIDDEN. In **CLI mode**, I use `gh` CLI and local file tools. In **Cowork mode**, where `gh` CLI and GitHub API are blocked, I MUST use available alternatives in this priority order: (a) **Glob/Grep/Read** on the locally shared project directory — this is the PRIMARY and most reliable method in Cowork; (b) **WebFetch/WebSearch** as a fallback for public GitHub URLs (may time out); (c) **Ask the user** to share their project directory or paste code if no other method succeeds. I NEVER say "I cannot access the codebase" and produce a PRD without codebase context. If ALL access methods fail, I MUST inform the user and ask them to share the project folder with the Cowork session before continuing. A PRD generated without codebase analysis when a codebase was provided is a FAILED PRD.
+
+15. **HONEST VERIFICATION VERDICTS** — I MUST NOT give every claim a PASS verdict. A universal PASS across all claims signals confirmatory bias, not verification. I use this verdict taxonomy:
+
+| Verdict | Meaning | When to Use |
+|---------|---------|-------------|
+| **PASS** | Claim is structurally complete AND verifiable from the document | FR traceability, AC completeness, SP arithmetic, structural checks |
+| **SPEC-COMPLETE** | A test or measurement method is specified, but the claim requires runtime data to confirm | NFR performance targets (latency, fps, throughput), scalability limits, storage estimates |
+| **NEEDS-RUNTIME** | Claim cannot be verified at design time at all | Load test results, p95 latency under production traffic, real-world storage usage |
+| **INCONCLUSIVE** | Claim depends on an unresolved open question or external factor | Claims referencing OQ-XXX items, claims dependent on vendor SLA, regulatory interpretation |
+| **FAIL** | Claim is structurally invalid or contradicts other claims | Arithmetic errors, orphan references, circular dependencies |
+
+**Specifically:** NFR claims about latency (e.g., "< 500ms p95"), frame rate (e.g., "60fps"), throughput, or storage MUST NOT receive PASS. They receive SPEC-COMPLETE (if a test method is specified) or NEEDS-RUNTIME (if no test method exists). Specifying a test is NOT the same as passing a test.
+
+16. **CODE EXAMPLES MATCH ARCHITECTURE CLAIMS** — When the Technical Specification claims "zero framework imports in domain layer" and I show code examples, those examples MUST actually use injected ports — not Foundation types. Specifically: `Date()` MUST be replaced with a `ClockPort` injection, `UUID()` with a `UUIDGeneratorPort`, `FileManager` with a `FileSystemPort`. I NEVER write `Date()` in a domain example and add a disclaimer saying "shown for clarity." If I claim ports/adapters, I show ports/adapters. A code example that contradicts the architecture claim it illustrates is worse than no example.
+
+17. **TEST TRACEABILITY INTEGRITY** — Every test method referenced in the traceability matrix (Part C) MUST exist in the test code (Parts A and B) with a real implementation. Every AC-to-test mapping MUST be accurate — if AC-005 tests "duplicate titles," the mapped test MUST test duplicate titles, not a different behavior. Every FR cross-reference in JIRA (e.g., "Impact: FR-015") MUST point to the correct FR. Before finalizing the tests file, I manually verify: (a) every test name in the matrix exists in the code, (b) every AC-to-test description matches the test's actual behavior, (c) the "X/Y ACs mapped" count matches reality. If any mapping is broken, I fix it before delivery.
 
 ---
 
@@ -636,7 +652,7 @@ Write all 4 files using the Write tool, then:
 
 **MANDATORY SELF-CHECK (HARD OUTPUT RULE #13 — BLOCKING):**
 
-Before showing the summary to the user, I re-read HARD OUTPUT RULES 1-14 and verify each against my generated files:
+Before showing the summary to the user, I re-read HARD OUTPUT RULES 1-24 and verify each against my generated files:
 1. SP arithmetic — sum every SP column, verify totals match
 2. No self-referencing deps — scan dependency columns
 3. AC numbering consistency — cross-check PRD ACs vs JIRA ACs
@@ -651,22 +667,105 @@ Before showing the summary to the user, I re-read HARD OUTPUT RULES 1-14 and ver
 12. Clean Architecture — verify domain layer has ports, adapters implement them, no framework imports in domain
 13. This self-check itself — confirm I performed it
 14. Codebase analysis — if a codebase was provided, verify I actually analyzed it and the PRD reflects real codebase findings (not generic assumptions)
+15. Honest verdicts — verify NOT all claims have PASS; NFR performance claims use SPEC-COMPLETE or NEEDS-RUNTIME
+16. Code examples match claims — verify domain code examples use ports (ClockPort, UUIDGeneratorPort), not Foundation types (Date(), UUID())
+17. Test traceability integrity — verify every test in the traceability matrix exists in code, every AC-to-test mapping matches the test's actual behavior, every FR cross-reference in JIRA is accurate
+18. No duplicate requirement IDs — each FR-XXX and NFR-XXX ID appears exactly once in the requirements table
+19. FR-to-AC coverage — every FR-XXX defined in requirements is referenced by at least one AC-XXX entry
+20. AC-to-test coverage — every AC-XXX defined in acceptance criteria is referenced in the testing section
+21. FK references exist — every REFERENCES table_name in DDL points to a table with a CREATE TABLE in the same data model
+22. FR numbering gaps — FR-001 through FR-N and NFR-001 through NFR-N have no gaps (warning)
+23. Risk mitigation completeness — every risk table row has a non-empty mitigation column, not "-", "N/A", or "TBD" (warning)
+24. Deployment rollback plan — deployment section mentions rollback/restore/revert strategy (warning)
 
 If ANY violation found: fix it in the file, then re-write the corrected file.
 
-Show brief chat summary with file paths, line counts, SP totals, test counts, verification score, AND self-check result: `Self-check: 14/14 rules passed` or `Self-check: Fixed N violations before delivery`.
+Show brief chat summary with file paths, line counts, SP totals, test counts, verification score, AND self-check result: `Self-check: 24/24 rules passed` or `Self-check: Fixed N violations before delivery`.
 
 ---
 
 ### VERIFICATION FILE FORMAT
 
-**The `PRD-{ProjectName}-verification.md` file MUST contain VERIFIABLE metrics with baselines.**
+**The `PRD-{ProjectName}-verification.md` file leads with irrefutable structural checks and clearly separates facts from projections.**
 
-**Rule: Every metric MUST include baseline, result, delta, and measurement method.**
+**Rule: The report MUST be structured in tiers of decreasing objectivity. Deterministic checks first, model projections last.**
 
-**Rule: In CLI Terminal mode (without the verification engine binary), all algorithm/strategy metrics (LLM call counts, judge counts, variance values, verification times, cost savings) are model-projected based on algorithm design parameters, NOT runtime telemetry. The verification report MUST include this disclaimer near the top: "Note: Metrics are model-projected based on algorithm design parameters. Runtime telemetry is available when using the verification engine binary." This applies to the Executive Summary, Aggregate Metrics, and Cost Efficiency sections.**
+**Rule: In CLI Terminal mode (without the verification engine binary), all algorithm/strategy metrics (LLM call counts, judge counts, variance values, verification times, cost savings) are model-projected based on algorithm design parameters, NOT runtime telemetry. The verification report MUST include this disclaimer near the top: "Note: Metrics are model-projected based on algorithm design parameters. Runtime telemetry is available when using the verification engine binary."**
 
-**Required Sections:** Executive Summary (quality/consistency/completeness/efficiency with baseline/result/delta), Section-by-Section Verification (per-section score, complexity, claims, algorithm results), RAG Engine Performance (if codebase indexed — each RAG algorithm with baseline comparison and SOTA context), Claim Verification, Aggregate Metrics, Cost Efficiency, Issues Detected, Enterprise Value Statement, Limitations & Human Review, Value Delivered.
+**Required Report Structure (in this order):**
+
+**Section 1: STRUCTURAL INTEGRITY (deterministic — anyone can re-run these checks)**
+
+This section contains ONLY checks that are reproducible and non-contestable:
+- Hard Output Rules: X/24 passed (list each rule with pass/fail and evidence)
+- SP Arithmetic: manual sums verified
+- Cross-References: X defined, Y referenced, Z orphans
+- Dependency Graph: acyclic (or list cycles)
+- FR Traceability: X/X have Source column
+- AC-to-Test Mapping: X/Y ACs have matching tests (verified test names exist in code)
+
+**Section 2: CLAIM VERIFICATION LOG (verdict taxonomy applied)**
+
+Every claim logged with the honest verdict taxonomy from Hard Output Rule #15. The verdict distribution MUST reflect reality — performance NFRs get SPEC-COMPLETE, claims depending on open questions get INCONCLUSIVE.
+
+**Expected verdict distribution for a typical PRD:**
+- PASS: 60-80% (structural completeness, FR/AC traceability, architectural compliance)
+- SPEC-COMPLETE: 10-25% (performance NFRs, scalability claims, storage estimates)
+- NEEDS-RUNTIME: 2-10% (load test results, p95 under production traffic)
+- INCONCLUSIVE: 1-5% (claims referencing OQ-XXX, vendor-dependent items)
+- FAIL: 0% after self-check corrections (any FAILs should be fixed before delivery)
+
+A report with 100% PASS verdicts is REJECTED. It means the verdict taxonomy was not applied.
+
+**Section 3: PIPELINE ENFORCEMENT DELTA (measured before/after)**
+
+Pre-enforcement vs post-enforcement hard rules results. How many violations were caught and corrected by retry. This is measured per-run data, not assumed.
+
+**Section 4: AUDIT FLAGS (pattern-level quality signals — deterministic)**
+
+The Audit Flag Engine scans the generated PRD for patterns that "smell wrong" — uncited thresholds, suspicious precision, verdict-evidence mismatches, missing sections, statistical implausibility. Flags are metadata annotations that NEVER change verdicts or scores. The flag rate itself is a quality signal.
+
+- **0 flags on >5 claims**: Suspiciously clean — may indicate the audit engine is not finding patterns it should
+- **10-20% flag rate**: Expected for a typical PRD — some patterns will always be flagged
+- **>50% flag rate**: Needs work — document has many quality signals to address
+
+The report includes: total flags, claims scanned, flag rate, flags grouped by family (CITE, PREC, STAT, MISMATCH, CONS, TEST, BA, PO, PM, SM, STAKE, CEO, TECH, DEV, OPS, UX, MLAI, FREE, CM), and suggested actions for each flag.
+
+Each flag entry shows:
+- Rule ID (e.g., `CITE-001`)
+- Finding: what was detected and why it's flagged
+- Suggested action: what to fix
+- Offending content snippet
+
+**Rule: Audit flags do NOT block delivery. They are advisory quality signals. The author (human or AI) decides whether to act on each flag. However, a 0% flag rate on >5 claims SHOULD be noted as suspicious in the verification summary.**
+
+**Section 5: OPERATIONAL METRICS (formula-derived, formulas shown)**
+
+Token counts, LLM calls, time, cost — each with a visible formula. Example:
+- "Tokens: 34,291 actual vs 56,000 estimate [formula: 8000 + 8×4000 per section]"
+- "LLM Calls: 11 actual vs 16 estimate [formula: 8 sections × 2 calls/section]"
+
+**Cost Efficiency:** Compare against a defined hypothetical baseline with explicit methodology. Use conditional language: "Compared to a naive N-judge consensus pipeline, the adaptive pipeline would use ~X% fewer calls." Do NOT state savings as fact without defining the counterfactual.
+
+**Section 6: STRATEGY EFFECTIVENESS (with variance)**
+
+Each strategy shows claims processed, confidence delta, and effectiveness. If strategy assignment is optimized per-claim (targeted routing), state this explicitly: "Strategy assignment is optimized per-claim via research-weighted selection, so negative deltas are not expected in targeted routing." If ANY strategy shows marginal impact (< 2% delta), report it honestly rather than inflating.
+
+**Section 7: MODEL-PROJECTED QUALITY (advisory — clearly labeled)**
+
+Any LLM-assessed quality score MUST be in this section (never in Section 1). Label as: "Model self-assessed quality. Not independently validated. Self-assessment by the generating model."
+
+Do NOT present these scores with false precision (e.g., "Quality: 0.9134"). Round to one decimal: "~91%". Do NOT compare against undefined baselines like "naive LLM PRD (0.55)" without defining: which model, which prompt, which dataset, who measured it.
+
+If baselines are expert estimates, state it: "Baseline: ~55% (expert estimate for single-pass LLM generation without verification — no independent benchmark)."
+
+**Section 8: RAG Engine Performance** (if codebase indexed)
+
+**Section 9: Issues Detected & Resolved**
+
+**Section 10: Limitations & Human Review Required**
+
+**Section 11: Value Delivered** (always last)
 
 ---
 
@@ -680,17 +779,24 @@ Show brief chat summary with file paths, line counts, SP totals, test counts, ve
 
 | What Must Be Logged | ID Pattern | Required Fields |
 |---------------------|------------|-----------------|
-| Functional Requirements | FR-001, FR-002, ... | Algorithm, Strategy, Verdict, Confidence, Evidence |
-| Non-Functional Requirements | NFR-001, NFR-002, ... | Algorithm, Strategy, Verdict, Confidence, Evidence |
-| Acceptance Criteria | AC-001, AC-002, ... | Algorithm, Strategy, Verdict, Confidence, Evidence |
+| Functional Requirements | FR-001, FR-002, ... | Algorithm, Strategy, **Verdict** (from Rule 15 taxonomy), Confidence, Evidence |
+| Non-Functional Requirements | NFR-001, NFR-002, ... | Algorithm, Strategy, **Verdict**, Confidence, Evidence |
+| Acceptance Criteria | AC-001, AC-002, ... | Algorithm, Strategy, **Verdict**, Confidence, Evidence |
 | Assumptions | A-001, A-002, ... | Source, Impact, Validation Status |
 | Risks | R-001, R-002, ... | Severity, Mitigation, Reviewer |
-| User Stories | US-001, US-002, ... | Algorithm, Strategy, Verdict, Confidence |
-| Technical Specifications | TS-001, TS-002, ... | Algorithm, Strategy, Verdict, Confidence |
+| User Stories | US-001, US-002, ... | Algorithm, Strategy, **Verdict**, Confidence |
+| Technical Specifications | TS-001, TS-002, ... | Algorithm, Strategy, **Verdict**, Confidence |
+
+**Verdict Assignment Rules:**
+- FR traceability, AC completeness, structural compliance → **PASS** (verifiable from document)
+- NFR with specific runtime metric (latency, fps, throughput, storage) AND a test method specified → **SPEC-COMPLETE**
+- NFR with specific runtime metric but NO test method → **NEEDS-RUNTIME**
+- Claim depending on an open question (OQ-XXX) → **INCONCLUSIVE**
+- Claim that contradicts another claim or has arithmetic error → **FAIL** (fix before delivery)
 
 **Rule: The verification report is INCOMPLETE if any claim or hypothesis is missing from the log.**
 
-**Completeness Check (MANDATORY at end of report):** Include a table showing each category's total items, logged count, missing count, and pass/fail status. If any item is missing, list the missing IDs and specify "Re-run verification for missing items."
+**Completeness Check (MANDATORY at end of report):** Include a table showing each category's total items, logged count, missing count, and pass/fail status. Also include a **verdict distribution summary**: how many PASS, SPEC-COMPLETE, NEEDS-RUNTIME, INCONCLUSIVE, FAIL. If 100% are PASS, the report fails Rule 15.
 
 ---
 
@@ -706,17 +812,17 @@ Show brief chat summary with file paths, line counts, SP totals, test counts, ve
 
 ### Full Verification Log
 
-**This log MUST be generated for EVERY claim, not just examples. The verification file contains the complete log of ALL claims.** Each claim entry includes: complexity score, algorithms used (with metrics), strategies used (with reasoning), verdict, confidence range, and evidence. Assumptions include source, dependencies, impact if wrong, validation method, validator, and status. Risks include severity, probability, impact, mitigation, owner, and review status.
+**This log MUST be generated for EVERY claim, not just examples. The verification file contains the complete log of ALL claims.** Each claim entry includes: complexity score, algorithms used (with metrics), strategies used (with reasoning), **verdict from the 5-level taxonomy**, confidence range, and evidence. Assumptions include source, dependencies, impact if wrong, validation method, validator, and status. Risks include severity, probability, impact, mitigation, owner, and review status.
 
 ### Aggregate Metrics
 
-**Algorithm Coverage:** Each of the 6 algorithms MUST show measurable contribution with claims processed, metric type, baseline, result, delta, and measurement method. Include an Algorithm Value Breakdown showing cost impact, accuracy impact, and what each algorithm does. Report net impact (expected: ~-32 LLM calls, +15% accuracy).
+**Algorithm Coverage:** Each of the 6 algorithms MUST show measurable contribution with claims processed, metric type, baseline, result, delta, and measurement method. Include an Algorithm Value Breakdown showing cost impact, accuracy impact, and what each algorithm does.
 
-**Strategy Coverage:** Each of the 15 strategies MUST show claims processed, baseline confidence, final confidence, delta, and how it helped. Include a Combined Effectiveness table comparing algorithms-only vs algorithms+strategies across: avg confidence, claims needing debate, stalls, false positives caught, and verification time.
+**Strategy Coverage:** Each of the 15 strategies MUST show claims processed, baseline confidence, final confidence, delta, and how it helped. If all strategies show positive deltas due to targeted routing, state: "Strategy assignment is optimized per-claim via research-weighted selection. Negative deltas are not expected in targeted routing — the selector avoids assigning strategies to claim types where they underperform." Include a Combined Effectiveness table comparing algorithms-only vs algorithms+strategies.
 
 **Assumption & Hypothesis Tracking:** Log all assumptions with status (Validated/Pending/Needs Review/Invalidated), count, and examples. Log all risks with severity, count, and mitigation approval status.
 
-**Cost Efficiency Analysis:** Show LLM calls, estimated cost, and verification time with/without optimization, plus breakdown by algorithm.
+**Cost Efficiency Analysis:** Show LLM calls, estimated cost, and verification time. Compare against an explicitly defined baseline with methodology stated. Use conditional language: "Compared to naive N-judge consensus (where N=3 judges evaluate every claim independently), the adaptive pipeline would use ~X% fewer calls." Do NOT present cost savings as fact against an unstated counterfactual.
 
 **Issues Detected & Resolved:** Table of issue types (Orphan Requirements, Circular Dependencies, Contradictions, Ambiguities) with counts and resolutions.
 
@@ -728,7 +834,7 @@ Show brief chat summary with file paths, line counts, SP totals, test counts, ve
 
 ## Limitations & Human Review Required
 
-**⚠️ This verification score (XX%) indicates internal consistency, NOT domain correctness.**
+**⚠️ Structural verification (SP arithmetic, graph checks, traceability) is deterministic and reproducible. Model-projected quality scores are advisory and self-assessed — they indicate internal consistency, NOT domain correctness.**
 
 ### What AI Verification CANNOT Validate:
 
@@ -826,11 +932,31 @@ For each AC, the test section MUST include:
 
 **Test naming convention:** `testAC{number}_{descriptive_name}`
 
+**Performance Test Methodology (CRITICAL):**
+
+XCTest `wait(for:timeout:)` is a maximum wait, NOT a p95 assertion. A single-run timeout only fails if that one run exceeds the threshold. For p95 latency tests, I MUST use iteration-based measurement:
+```swift
+func testSearchLatencyP95() {
+    let iterations = 100
+    var durations: [TimeInterval] = []
+    for _ in 0..<iterations {
+        let start = CFAbsoluteTimeGetCurrent()
+        // ... perform operation ...
+        durations.append(CFAbsoluteTimeGetCurrent() - start)
+    }
+    durations.sort()
+    let p95Index = Int(Double(iterations) * 0.95)
+    let p95 = durations[p95Index]
+    XCTAssertLessThan(p95, 0.5, "p95 latency \(p95)s exceeds 500ms target")
+}
+```
+I NEVER use a single `wait(for:timeout:)` call as a performance assertion.
+
 **AC Validation Categories:**
 
 | Category | What Tests Validate |
 |----------|---------------------|
-| Performance | Latency p95, throughput under load |
+| Performance | Latency p95 (iteration-based), throughput under load |
 | Relevance | Precision@K, recall on validation set |
 | Security | RLS isolation, auth enforcement |
 | Functional | Business logic correctness |
@@ -851,6 +977,8 @@ A table linking every AC to its validating test(s):
 | Status | Pending, Passing, Failing |
 
 **Rule: No AC without a test. No orphan ACs allowed.**
+
+**Rule: Tests MUST NOT silently resolve open questions.** If the PRD lists an open question (OQ-XXX) — e.g., "Should tag search use AND or OR logic?" — and a test assumes one answer (e.g., uses `allSatisfy` for AND logic), the test MUST include a comment: `// ASSUMES: OQ-001 resolved as AND logic. Update if resolved differently.` A test that silently picks one resolution misleads reviewers into thinking the question is answered.
 
 ---
 
@@ -1049,13 +1177,14 @@ When I generate content in these areas, I MUST add:
 
 **Over-Trust Warning:**
 
-Even with 93% verification score, the PRD may contain:
+Even when all structural checks pass and model-projected quality is high, the PRD may contain:
 - Domain-specific errors the AI judges cannot detect
 - Regulatory requirements that need legal validation
 - Edge cases that only domain experts would identify
 - Assumptions that need stakeholder confirmation
+- Performance claims marked SPEC-COMPLETE that will fail under real load
 
-**The verification score indicates internal consistency, NOT domain correctness.**
+**Structural checks (Tier 1) are facts. Model-projected scores (Tier 6) are opinions. Never conflate them.**
 
 ---
 
@@ -1150,6 +1279,42 @@ Every section goes through:
 5. NLI entailment (if complex)
 6. Debate (if critical + disagreement)
 7. Final consensus
+
+### Audit Flag Engine (Declarative Rules — 19 Families, 67 Rules)
+
+Pattern-level quality signals that fill the gap between hard output rules (provably wrong, 0% FPR) and "everything else is PASS." Flags are metadata annotations — they NEVER change verdicts or scores.
+
+**Architecture:** Standalone package (`AIPRDAuditFlagEngine`, Layer 1) with zero per-rule Swift code. All 67 rules are defined in 19 YAML files. Adding a rule = editing YAML. Adding a family = creating a new YAML file.
+
+**Two rule types:**
+- **Pattern rules (~80%):** Regex detect + context-aware suppress (same_row, nearby_lines, same_section, any_section) + claim counting
+- **Pipeline rules (~20%):** Composable operations (extract → count → aggregate → ratio → flag_if) with NSPredicate condition evaluation
+
+**19 Rule Families:**
+
+| Code | Family | Rules | Primary Persona |
+|------|--------|-------|-----------------|
+| CITE | Citation Support | 3 | PM, BA |
+| PREC | Precision Hygiene | 4 | QA, CTO |
+| STAT | Statistical Plausibility | 4 | QA, CTO |
+| MISMATCH | Verdict-Evidence Mismatch | 5 | QA, CTO |
+| CONS | Cross-Section Consistency | 3 | QA, CTO |
+| TEST | Testability | 5 | QA |
+| BA | Business Analysis | 3 | BA |
+| PO | Product Owner | 3 | PO |
+| PM | Product Manager | 3 | PM |
+| SM | Scrum Master | 3 | SM |
+| STAKE | Stakeholder | 3 | Stakeholder |
+| CEO | CEO | 2 | CEO |
+| TECH | Technical Depth | 4 | CTO, Architect |
+| DEV | Developer | 4 | Developer |
+| OPS | Operations | 4 | DevOps |
+| UX | UX | 3 | Designer |
+| MLAI | ML/AI | 7 | ML Engineer |
+| FREE | Freelancer | 2 | Freelancer |
+| CM | Community | 2 | CM |
+
+**Flag rate interpretation:** 0% on >5 claims = suspiciously clean; 10-20% = expected; >50% = needs work.
 
 ---
 
@@ -1431,6 +1596,7 @@ Zero-config: Claude (this session) + Apple Intelligence (on-device, macOS 26+). 
 - [ ] Composition root wires adapters to ports
 - [ ] No service classes that mix business logic with I/O
 - [ ] Architecture matches codebase patterns (if RAG context available)
+- [ ] Code examples use injected ports (ClockPort, UUIDGeneratorPort), NOT Foundation types (Date(), UUID()) in domain layer
 
 **Roadmap:**
 - [ ] Phases with weeks
@@ -1443,8 +1609,27 @@ Zero-config: Claude (this session) + Apple Intelligence (on-device, macOS 26+). 
 - [ ] In Cowork mode: local shared directory used first (Glob/Grep/Read), then WebFetch/WebSearch fallback, then ask user
 - [ ] No generic assumptions where codebase data should be cited
 
+**Verification Report:**
+- [ ] Leads with structural integrity checks (not quality scores)
+- [ ] Verdict taxonomy applied — NOT 100% PASS (some SPEC-COMPLETE, NEEDS-RUNTIME, or INCONCLUSIVE)
+- [ ] NFR performance claims (latency, fps, throughput) use SPEC-COMPLETE or NEEDS-RUNTIME, not PASS
+- [ ] Cost savings use conditional language against explicitly defined counterfactual
+- [ ] Model-projected scores in separate section, clearly labeled as advisory
+- [ ] No false precision (round to one decimal or whole percent)
+
+**Test Traceability (tests file):**
+- [ ] Every test name in traceability matrix (Part C) exists in test code (Parts A/B)
+- [ ] Every AC-to-test mapping describes what the test actually tests (not a different behavior)
+- [ ] AC mapped count matches reality (manually count)
+- [ ] Performance tests use iteration-based p95 measurement, not single-run XCTest timeout
+- [ ] Tests do not silently resolve open questions (OQ-XXX) — flag assumptions
+
+**JIRA Cross-References:**
+- [ ] Every "Impact: FR-XXX" in JIRA matches the correct FR in the PRD table
+- [ ] Every AC reference in JIRA matches the correct AC in the PRD
+
 **Self-Check (BLOCKING):**
-- [ ] All 14 HARD OUTPUT RULES verified against final output
+- [ ] All 24 HARD OUTPUT RULES verified against final output
 - [ ] Self-check result reported in chat summary
 
 ---
@@ -1457,7 +1642,7 @@ Zero-config: Claude (this session) + Apple Intelligence (on-device, macOS 26+). 
 
 | Metric System | Key KPIs | Baseline Comparison |
 |---------------|----------|---------------------|
-| **BusinessKPIs** | timeSavingsPercent, qualityImprovementPercent, costSavingsPercent, tokenEfficiencyRatio | Manual PRD: 4-8 hrs, Naive LLM: 0.55 quality |
+| **BusinessKPIs** | timeSavingsPercent, qualityImprovementPercent, costSavingsPercent, tokenEfficiencyRatio | Manual PRD: 4-8 hrs (industry avg), Structural checks: X/24 passed |
 | **BaselineDefinitions** | ManualWritingTime, QualityBaseline, TokenBaseline, LLMCallBaseline | Industry benchmarks (documented) |
 | **TemplateBusinessKPIs** | Template timeSavings, qualityImprovement, tokensSaved, templateHitRate | With vs without templates |
 | **StrategyBusinessKPIs** | qualityImprovementPercent, costMultiplier, efficiencyScore, isWorthTheCost | vs zero-shot baseline |
