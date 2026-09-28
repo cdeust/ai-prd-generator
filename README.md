@@ -63,6 +63,10 @@ Check current license status:
 
 **4-File Export** — Every generation produces `PRD-{Name}.md`, `PRD-{Name}-jira.md`, `PRD-{Name}-tests.md`, and `PRD-{Name}-verification.md`.
 
+### Related Tools
+
+- **[MySpec](https://myspec.dev)** — Web-based interactive requirements discovery platform and spec compiler. Generates a 4-file specification bundle (`constitution.md`, `requirements.md`, `solution.md`, `tasks.md`) with native MCP server integration (`@myspec/mcp-server`) for Claude Code and Cursor. Free tier includes 20 projects and 100 spec files.
+
 ## How It Works
 
 1. **License check** — Reads saved license key from `~/.aiprd/license-key`. If none found, asks whether to enter a key or continue with free tier.
